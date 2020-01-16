@@ -1,0 +1,45 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="plateMap">
+            <h2><span>Plate Map</span> {{plateMap.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span>Status</span></dt>
+                <dd>
+                    <span>{{plateMap.status}}</span>
+                </dd>
+                <dt><span>Last Modified</span></dt>
+                <dd>
+                    <span>{{plateMap.lastModified}}</span>
+                </dd>
+                <dt><span ngbTooltip="The checksum is used when saving a new draft, as the last checksum has to be passed\nand match the most recent timestamp. Otherwise it is considered attempting to save a stale draft">Checksum</span></dt>
+                <dd>
+                    <span>{{plateMap.checksum}}</span>
+                </dd>
+                <dt><span ngbTooltip="The data field is a gzip -&gt; base64 encoded string of the plate map data">Data</span></dt>
+                <dd>
+                    <span>{{plateMap.data}}</span>
+                </dd>
+                <dt><span>Activity</span></dt>
+                <dd>
+                    <div *ngIf="plateMap.activity">
+                        <a [routerLink]="['/activity', plateMap.activity?.id, 'view']">{{plateMap.activity?.id}}</a>
+                    </div>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/plate-map', plateMap.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,256 @@
+image: jhipster/jhipster:v6.6.0
+
+cache:
+  key: '$CI_COMMIT_REF_NAME'
+  paths:
+    - .maven/
+stages:
+  - check
+  - build
+  - test
+  - analyze
+  - package
+  - release
+  - setup_env
+  - cleanup
+  - deploy
+
+before_script:
+  - export MAVEN_USER_HOME=`pwd`/.maven
+  - ./mvnw -ntp com.github.eirslett:frontend-maven-plugin:install-node-and-npm -DnodeVersion=v12.13.1 -DnpmVersion=6.13.4 -Dmaven.repo.local=$MAVEN_USER_HOME
+  - ./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm -Dmaven.repo.local=$MAVEN_USER_HOME
+
+nohttp:
+  stage: check
+  script:
+    - ./mvnw -ntp checkstyle:check -Dmaven.repo.local=$MAVEN_USER_HOME
+
+maven-compile:
+  stage: build
+  script:
+    - ./mvnw -ntp compile -Dmaven.repo.local=$MAVEN_USER_HOME
+  artifacts:
+    paths:
+      - target/classes/
+      - target/generated-sources/
+    expire_in: 1 day
+
+maven-test:
+  stage: test
+  script:
+    - ./mvnw -ntp verify -Dmaven.repo.local=$MAVEN_USER_HOME
+  artifacts:
+    reports:
+      junit: target/test-results/**/TEST-*.xml
+    paths:
+      - target/test-results
+      - target/jacoco
+    expire_in: 1 day
+
+frontend-test:
+  stage: test
+  script:
+    - ./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm -Dfrontend.npm.arguments='run test-ci' -Dmaven.repo.local=$MAVEN_USER_HOME
+  artifacts:
+    reports:
+      junit: target/test-results/TESTS-results-jest.xml
+    paths:
+      - target/test-results
+      - target/jacoco
+    expire_in: 1 day
+
+maven-package:
+  stage: package
+  script:
+    - ./mvnw -ntp verify -Pprod -DskipTests -Dmaven.repo.local=$MAVEN_USER_HOME
+  artifacts:
+    paths:
+      - target/*.jar
+      - target/classes
+    expire_in: 1 day
+
+# Uncomment the following line to use gitlabs container registry. You need to adapt the REGISTRY_URL in case you are not using gitlab.com
+docker-push:
+  image: docker:git
+  stage: release
+  only:
+    - master
+    - develop
+  services:
+    - docker:dind
+  dependencies:
+    - maven-package
+  script:
+    - cp src/main/docker/* .
+    - ls
+    - docker info
+    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker build -t "${CI_REGISTRY_IMAGE}:latest" .
+    - docker tag "${CI_REGISTRY_IMAGE}:latest" "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
+    - test ! -z "${CI_COMMIT_TAG}" && docker push "${CI_REGISTRY_IMAGE}:latest"
+    - docker push "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
+
+# May fail if the secret already exists
+# Only need one setup per namespace, so we do this in master only
+setup_environment:
+  image: kokyj/kubectl-aws:1.14
+  stage: setup_env
+  environment:
+    name: live
+    url: http://$CI_PROJECT_NAME.apps.kaleidobio.com
+  allow_failure: true
+  only:
+    - master
+    - develop
+  before_script:
+    - ls
+  script:
+    - kubectl version
+
+    # Setting up the namespace & permissions
+    - cd gitlab-ci/
+    - sed -i "s/__CI_ENVIRONMENT_SLUG__/${CI_ENVIRONMENT_SLUG}/" namespace.yaml rbac.yaml
+    - sed -i "s/__VERSION__/${CI_COMMIT_REF_NAME}/" namespace.yaml rbac.yaml
+    - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" namespace.yaml rbac.yaml
+    - kubectl apply -f namespace.yaml
+    - kubectl apply -f rbac.yaml
+
+    # Docker Registry secret is needed to be able to pull images
+    # Will probably already be in there, we have had issues with this not propertly creating the regsecret
+    - kubectl create secret docker-registry regsecret --docker-server=${CI_REGISTRY} --docker-username=${CI_REGISTRY_USER} --docker-password=${CI_REGISTRY_PASSWORD} --docker-email=wesley.fowlks@kaleido.com --namespace ${CI_PROJECT_NAME}
+
+teardown_staging:
+  image: kokyj/kubectl-aws:1.14
+  stage: cleanup
+  allow_failure: true
+  environment:
+    name: staging
+    url: https://$CI_PROJECT_NAME-staging.apps.kaleidobio.com
+  only:
+    - develop
+  before_script:
+    - ls
+  script:
+    - kubectl version
+
+    # Build the manifests
+    - cd manifests/
+    - sed -i "s/__CI_ENVIRONMENT_SLUG__/${CI_ENVIRONMENT_SLUG}/" deployment.yaml service.yaml
+    - sed -i "s/__SERVER_PORT__/8080/" deployment.yaml service.yaml
+    - sed -i "s/__VERSION__/${CI_COMMIT_REF_NAME}/" deployment.yaml service.yaml
+    - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" deployment.yaml service.yaml
+    - sed -i "s/__CI_PROJECT_NAMESPACE__/${CI_PROJECT_NAMESPACE}/" deployment.yaml
+    - sed -i "s/__URL__/${CI_PROJECT_NAME}-staging/" ingress.yaml deployment.yaml
+    - cat deployment.yaml
+    - cat service.yaml
+
+    # Cleanup old services to make sure new docker containers are pulled
+    - kubectl delete -f deployment.yaml
+    - kubectl delete -f service.yaml
+
+deploy_staging:
+  image: kokyj/kubectl-aws:1.14
+  stage: deploy
+  environment:
+    name: staging
+    url: https://$CI_PROJECT_NAME-staging.apps.kaleidobio.com
+  only:
+    - develop
+  before_script:
+    - ls
+  script:
+    - kubectl version
+
+    # Build the manifests
+    - cd manifests/
+    - sed -i "s/__CI_ENVIRONMENT_SLUG__/${CI_ENVIRONMENT_SLUG}/" deployment.yaml ingress.yaml service.yaml
+    - sed -i "s/__SERVER_PORT__/8080/" deployment.yaml ingress.yaml service.yaml
+    - sed -i "s/__VERSION__/${CI_COMMIT_REF_NAME}/" deployment.yaml ingress.yaml service.yaml
+    - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" deployment.yaml ingress.yaml service.yaml
+    - sed -i "s/__CI_PROJECT_NAMESPACE__/${CI_PROJECT_NAMESPACE}/" deployment.yaml
+    - sed -i 's/__DATADOG_ENABLED__/"false"/' deployment.yaml
+    - sed -i "s/__DATADOG_API_KEY__/${datadog_api_key}/" deployment.yaml
+    - sed -i "s/__DATADOG_APPLICATION_KEY__/${datadog_application_key}/" deployment.yaml
+    - sed -i "s/__URL__/${CI_PROJECT_NAME}-staging/" ingress.yaml deployment.yaml
+    - sed -i "s/__JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET__/${JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET}/" deployment.yaml
+    - sed -i "s/__DB_PASSWORD__/${db_password}/" deployment.yaml
+    - sed -i "s/__DB_URL__/${db_url}/" deployment.yaml
+    - sed -i "s/__ELASTICSEARCH_URL__/${elasticsearch_url}/" deployment.yaml
+    - cat deployment.yaml
+    - cat ingress.yaml
+    - cat service.yaml
+
+    # Prepare for liftoff
+    - kubectl apply -f deployment.yaml
+    - kubectl apply -f service.yaml
+    - kubectl apply -f ingress.yaml
+    - kubectl rollout status -f deployment.yaml
+    - kubectl get all,ing -l ref=${CI_ENVIRONMENT_SLUG}
+
+teardown_live:
+  image: kokyj/kubectl-aws:1.14
+  stage: cleanup
+  allow_failure: true
+  environment:
+    name: live
+    url: https://$CI_PROJECT_NAME.apps.kaleidobio.com
+  only:
+    - master
+  before_script:
+    - ls
+  script:
+    - kubectl version
+
+    # Build the manifests
+    - cd manifests/
+    - sed -i "s/__CI_ENVIRONMENT_SLUG__/${CI_ENVIRONMENT_SLUG}/" deployment.yaml service.yaml
+    - sed -i "s/__SERVER_PORT__/8080/" deployment.yaml service.yaml
+    - sed -i "s/__VERSION__/${CI_COMMIT_REF_NAME}/" deployment.yaml service.yaml
+    - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" deployment.yaml service.yaml
+    - sed -i "s/__CI_PROJECT_NAMESPACE__/${CI_PROJECT_NAMESPACE}/" deployment.yaml
+    - sed -i "s/__URL__/${CI_PROJECT_NAME}/" ingress.yaml deployment.yaml
+    - cat deployment.yaml
+    - cat service.yaml
+
+    # Cleanup old services to make sure new docker containers are pulled
+    - kubectl delete -f deployment.yaml
+    - kubectl delete -f service.yaml
+
+deploy_live:
+  image: kokyj/kubectl-aws:1.14
+  stage: deploy
+  environment:
+    name: live
+    url: https://$CI_PROJECT_NAME.apps.kaleidobio.com
+  only:
+    - master
+  before_script:
+    - ls
+  script:
+    - kubectl version
+
+    # Build the manifests
+    - cd manifests/
+    - sed -i "s/__CI_ENVIRONMENT_SLUG__/${CI_ENVIRONMENT_SLUG}/" deployment.yaml ingress.yaml service.yaml
+    - sed -i "s/__SERVER_PORT__/8080/" deployment.yaml ingress.yaml service.yaml
+    - sed -i "s/__VERSION__/${CI_COMMIT_REF_NAME}/" deployment.yaml ingress.yaml service.yaml
+    - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" deployment.yaml ingress.yaml service.yaml
+    - sed -i "s/__CI_PROJECT_NAMESPACE__/${CI_PROJECT_NAMESPACE}/" deployment.yaml
+    - sed -i 's/__DATADOG_ENABLED__/"true"/' deployment.yaml
+    - sed -i "s/__DATADOG_API_KEY__/${datadog_api_key}/" deployment.yaml
+    - sed -i "s/__DATADOG_APPLICATION_KEY__/${datadog_application_key}/" deployment.yaml
+    - sed -i "s/__URL__/${CI_PROJECT_NAME}-staging/" ingress.yaml deployment.yaml
+    - sed -i "s/__JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET__/${JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET}/" deployment.yaml
+    - sed -i "s/__DB_PASSWORD__/${db_password}/" deployment.yaml
+    - sed -i "s/__DB_URL__/${db_url}/" deployment.yaml
+    - sed -i "s/__ELASTICSEARCH_URL__/${elasticsearch_url}/" deployment.yaml
+    - cat deployment.yaml
+    - cat ingress.yaml
+    - cat service.yaml
+
+    # Prepare for liftoff
+    - kubectl apply -f deployment.yaml
+    - kubectl apply -f service.yaml
+    - kubectl apply -f ingress.yaml
+    - kubectl rollout status -f deployment.yaml
+    - kubectl get all,ing -l ref=${CI_ENVIRONMENT_SLUG}

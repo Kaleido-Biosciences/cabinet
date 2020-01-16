@@ -1,6 +1,24 @@
-# cabinet
+# Cabinet
 
-This application was generated using JHipster 6.6.0, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v6.6.0](https://www.jhipster.tech/documentation-archive/v6.6.0).
+Cabinet is a Database schema and API for storing and accessing information about activities.
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Versioning
+
+We use [SemVer](https://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/Kaleido-Biosciences/fetch/tags).
+
+## Authors
+
+- **Wes Fowlks** - _Initial work_ - [@wfowlks](https://github.com/wfowlks)
+
+See also the list of [contributors](https://github.com/Kaleido-Biosciences/cabinet/graphs/contributors) who participated in this project.
+
+## License
+
+This project is licensed under the BSD 3-clause "New" or "Revised" License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Development
 

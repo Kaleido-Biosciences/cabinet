@@ -42,6 +42,9 @@ public class CacheConfiguration {
             createCache(cm, com.kaleido.domain.User.class.getName());
             createCache(cm, com.kaleido.domain.Authority.class.getName());
             createCache(cm, com.kaleido.domain.User.class.getName() + ".authorities");
+            createCache(cm, com.kaleido.domain.PlateMap.class.getName());
+            createCache(cm, com.kaleido.domain.Activity.class.getName());
+            createCache(cm, com.kaleido.domain.Activity.class.getName() + ".platemaps");
             // jhipster-needle-ehcache-add-entry
         };
     }

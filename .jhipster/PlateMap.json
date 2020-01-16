@@ -1,0 +1,47 @@
+{
+    "name": "PlateMap",
+    "fields": [
+        {
+            "fieldName": "status",
+            "fieldType": "Status",
+            "fieldValues": "DRAFT,COMPLETED"
+        },
+        {
+            "fieldName": "lastModified",
+            "fieldType": "ZonedDateTime"
+        },
+        {
+            "fieldName": "checksum",
+            "javadoc": "The checksum is used when saving a new draft, as the last checksum has to be passed\\nand match the most recent timestamp. Otherwise it is considered attempting to save a stale draft",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "data",
+            "javadoc": "The data field is a gzip -> base64 encoded string of the plate map data",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 1073741824
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "many-to-one",
+            "otherEntityName": "activity",
+            "otherEntityRelationshipName": "platemap",
+            "relationshipName": "activity",
+            "otherEntityField": "id"
+        }
+    ],
+    "changelogDate": "20200116153934",
+    "entityTableName": "plate_map",
+    "dto": "no",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "readOnly": false,
+    "clientRootFolder": "",
+    "applications": "*"
+}
