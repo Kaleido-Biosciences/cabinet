@@ -7,7 +7,6 @@ cache:
 stages:
   - check
   - build
-  - test
   - analyze
   - package
   - release
@@ -33,30 +32,6 @@ maven-compile:
     paths:
       - target/classes/
       - target/generated-sources/
-    expire_in: 1 day
-
-maven-test:
-  stage: test
-  script:
-    - ./mvnw -ntp verify -Dmaven.repo.local=$MAVEN_USER_HOME
-  artifacts:
-    reports:
-      junit: target/test-results/**/TEST-*.xml
-    paths:
-      - target/test-results
-      - target/jacoco
-    expire_in: 1 day
-
-frontend-test:
-  stage: test
-  script:
-    - ./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm -Dfrontend.npm.arguments='run test-ci' -Dmaven.repo.local=$MAVEN_USER_HOME
-  artifacts:
-    reports:
-      junit: target/test-results/TESTS-results-jest.xml
-    paths:
-      - target/test-results
-      - target/jacoco
     expire_in: 1 day
 
 maven-package:
