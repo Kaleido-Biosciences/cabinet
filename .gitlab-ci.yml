@@ -234,7 +234,7 @@ deploy_live:
     - sed -i 's/__DATADOG_ENABLED__/"true"/' deployment.yaml
     - sed -i "s/__DATADOG_API_KEY__/${datadog_api_key}/" deployment.yaml
     - sed -i "s/__DATADOG_APPLICATION_KEY__/${datadog_application_key}/" deployment.yaml
-    - sed -i "s/__URL__/${CI_PROJECT_NAME}-staging/" ingress.yaml deployment.yaml
+    - sed -i "s/__URL__/${CI_PROJECT_NAME}/" ingress.yaml deployment.yaml
     - sed -i "s|__JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET__|${JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET}|" deployment.yaml
     - sed -i "s/__DB_PASSWORD__/${db_password}/" deployment.yaml
     - sed -i "s/__DB_URL__/${db_url}/" deployment.yaml
