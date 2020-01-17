@@ -24,7 +24,7 @@
             <column name="checksum" type="varchar(255)" remarks="The checksum is used when saving a new draft, as the last checksum has to be passed\nand match the most recent timestamp. Otherwise it is considered attempting to save a stale draft">
                 <constraints nullable="true" />
             </column>
-            <column name="data" type="varchar(1073741824)" remarks="The data field is a gzip -&gt; base64 encoded string of the plate map data">
+            <column name="data" type="varchar(10485760)" remarks="The data field is a gzip -&gt; base64 encoded string of the plate map data">
                 <constraints nullable="true" />
             </column>
             <column name="activity_id" type="bigint">

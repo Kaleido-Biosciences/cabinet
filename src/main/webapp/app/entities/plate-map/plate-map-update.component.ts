@@ -27,7 +27,7 @@ export class PlateMapUpdateComponent implements OnInit {
     status: [],
     lastModified: [],
     checksum: [],
-    data: [null, [Validators.maxLength(1073741824)]],
+    data: [null, [Validators.maxLength(10485760)]],
     activity: []
   });
 

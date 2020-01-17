@@ -1,17 +1,17 @@
 entity PlateMap {
     status Status,
     lastModified ZonedDateTime,
-    
+
     /**
-     * The checksum is used when saving a new draft, as the last checksum has to be passed 
+     * The checksum is used when saving a new draft, as the last checksum has to be passed
      * and match the most recent timestamp. Otherwise it is considered attempting to save a stale draft
      */
     checksum String,
-    
+
     /**
      * The data field is a gzip -> base64 encoded string of the plate map data
      */
-    data String maxlength(1073741824)
+    data String maxlength(10485760)
 }
 
 entity Activity {

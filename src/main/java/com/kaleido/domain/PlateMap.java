@@ -47,9 +47,9 @@ public class PlateMap implements Serializable {
     /**
      * The data field is a gzip -> base64 encoded string of the plate map data
      */
-    @Size(max = 1073741824)
+    @Size(max = 10485760)
     @ApiModelProperty(value = "The data field is a gzip -> base64 encoded string of the plate map data")
-    @Column(name = "data", length = 1073741824)
+    @Column(name = "data", length = 10485760)
     private String data;
 
     @ManyToOne

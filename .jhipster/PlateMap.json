@@ -22,7 +22,7 @@
             "fieldValidateRules": [
                 "maxlength"
             ],
-            "fieldValidateRulesMaxlength": 1073741824
+            "fieldValidateRulesMaxlength": 10485760
         }
     ],
     "relationships": [
