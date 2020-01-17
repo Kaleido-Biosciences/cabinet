@@ -11,7 +11,7 @@ stages:
   - analyze
   - package
   - release
-  - setup
+  - setup_env
   - cleanup
   - deploy
 
