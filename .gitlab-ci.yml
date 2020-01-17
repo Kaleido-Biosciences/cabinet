@@ -7,14 +7,16 @@ cache:
 stages:
   - check
   - build
+  - test
   - analyze
   - package
   - release
-  - setup_env
+  - setup
   - cleanup
   - deploy
 
 before_script:
+  - export NG_CLI_ANALYTICS="false"
   - export MAVEN_USER_HOME=`pwd`/.maven
   - ./mvnw -ntp com.github.eirslett:frontend-maven-plugin:install-node-and-npm -DnodeVersion=v12.13.1 -DnpmVersion=6.13.4 -Dmaven.repo.local=$MAVEN_USER_HOME
   - ./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm -Dmaven.repo.local=$MAVEN_USER_HOME
@@ -34,6 +36,30 @@ maven-compile:
       - target/generated-sources/
     expire_in: 1 day
 
+maven-test:
+  stage: test
+  script:
+    - ./mvnw -ntp verify -Dmaven.repo.local=$MAVEN_USER_HOME
+  artifacts:
+    reports:
+      junit: target/test-results/**/TEST-*.xml
+    paths:
+      - target/test-results
+      - target/jacoco
+    expire_in: 1 day
+
+frontend-test:
+  stage: test
+  script:
+    - ./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm -Dfrontend.npm.arguments='run test' -Dmaven.repo.local=$MAVEN_USER_HOME
+  artifacts:
+    reports:
+      junit: target/test-results/TESTS-results-jest.xml
+    paths:
+      - target/test-results
+      - target/jacoco
+    expire_in: 1 day
+
 maven-package:
   stage: package
   script:
@@ -46,24 +72,17 @@ maven-package:
 
 # Uncomment the following line to use gitlabs container registry. You need to adapt the REGISTRY_URL in case you are not using gitlab.com
 docker-push:
-  image: docker:git
   stage: release
   only:
     - master
     - develop
-  services:
-    - docker:dind
+  variables:
+    REGISTRY_URL: $CI_REGISTRY
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   dependencies:
     - maven-package
   script:
-    - cp src/main/docker/* .
-    - ls
-    - docker info
-    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
-    - docker build -t "${CI_REGISTRY_IMAGE}:latest" .
-    - docker tag "${CI_REGISTRY_IMAGE}:latest" "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
-    - test ! -z "${CI_COMMIT_TAG}" && docker push "${CI_REGISTRY_IMAGE}:latest"
-    - docker push "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
+    - ./mvnw -ntp compile jib:build -Pprod -Djib.to.image=$IMAGE_TAG -Djib.to.auth.username=gitlab-ci-token  -Djib.to.auth.password=$CI_BUILD_TOKEN -Dmaven.repo.local=$MAVEN_USER_HOME
 
 # May fail if the secret already exists
 # Only need one setup per namespace, so we do this in master only
@@ -92,7 +111,7 @@ setup_environment:
 
     # Docker Registry secret is needed to be able to pull images
     # Will probably already be in there, we have had issues with this not propertly creating the regsecret
-    - kubectl create secret docker-registry regsecret --docker-server=${CI_REGISTRY} --docker-username=${CI_REGISTRY_USER} --docker-password=${CI_REGISTRY_PASSWORD} --docker-email=wesley.fowlks@kaleido.com --namespace ${CI_PROJECT_NAME}
+    #- kubectl create secret docker-registry regsecret --docker-server=${CI_REGISTRY} --docker-username=${CI_REGISTRY_USER} --docker-password=${CI_REGISTRY_PASSWORD} --docker-email=wesley.fowlks@kaleido.com --namespace ${CI_PROJECT_NAME}
 
 teardown_staging:
   image: kokyj/kubectl-aws:1.14
