@@ -1,5 +1,4 @@
 import { Moment } from 'moment';
-import { IActivity } from 'app/shared/model/activity.model';
 import { Status } from 'app/shared/model/enumerations/status.model';
 
 export interface IPlateMap {
@@ -7,8 +6,8 @@ export interface IPlateMap {
   status?: Status;
   lastModified?: Moment;
   checksum?: string;
+  activityName?: string;
   data?: string;
-  activity?: IActivity;
 }
 
 export class PlateMap implements IPlateMap {
@@ -17,7 +16,7 @@ export class PlateMap implements IPlateMap {
     public status?: Status,
     public lastModified?: Moment,
     public checksum?: string,
-    public data?: string,
-    public activity?: IActivity
+    public activityName?: string,
+    public data?: string
   ) {}
 }

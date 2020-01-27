@@ -4,14 +4,11 @@ import { HttpResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
 
 import { IPlateMap, PlateMap } from 'app/shared/model/plate-map.model';
 import { PlateMapService } from './plate-map.service';
-import { IActivity } from 'app/shared/model/activity.model';
-import { ActivityService } from 'app/entities/activity/activity.service';
 
 @Component({
   selector: 'jhi-plate-map-update',
@@ -20,36 +17,20 @@ import { ActivityService } from 'app/entities/activity/activity.service';
 export class PlateMapUpdateComponent implements OnInit {
   isSaving = false;
 
-  activities: IActivity[] = [];
-
   editForm = this.fb.group({
     id: [],
     status: [],
     lastModified: [],
     checksum: [],
-    data: [null, [Validators.maxLength(10485760)]],
-    activity: []
+    activityName: [],
+    data: [null, [Validators.maxLength(10485760)]]
   });
 
-  constructor(
-    protected plateMapService: PlateMapService,
-    protected activityService: ActivityService,
-    protected activatedRoute: ActivatedRoute,
-    private fb: FormBuilder
-  ) {}
+  constructor(protected plateMapService: PlateMapService, protected activatedRoute: ActivatedRoute, private fb: FormBuilder) {}
 
   ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ plateMap }) => {
       this.updateForm(plateMap);
-
-      this.activityService
-        .query()
-        .pipe(
-          map((res: HttpResponse<IActivity[]>) => {
-            return res.body ? res.body : [];
-          })
-        )
-        .subscribe((resBody: IActivity[]) => (this.activities = resBody));
     });
   }
 
@@ -59,8 +40,8 @@ export class PlateMapUpdateComponent implements OnInit {
       status: plateMap.status,
       lastModified: plateMap.lastModified != null ? plateMap.lastModified.format(DATE_TIME_FORMAT) : null,
       checksum: plateMap.checksum,
-      data: plateMap.data,
-      activity: plateMap.activity
+      activityName: plateMap.activityName,
+      data: plateMap.data
     });
   }
 
@@ -88,8 +69,8 @@ export class PlateMapUpdateComponent implements OnInit {
           ? moment(this.editForm.get(['lastModified'])!.value, DATE_TIME_FORMAT)
           : undefined,
       checksum: this.editForm.get(['checksum'])!.value,
-      data: this.editForm.get(['data'])!.value,
-      activity: this.editForm.get(['activity'])!.value
+      activityName: this.editForm.get(['activityName'])!.value,
+      data: this.editForm.get(['data'])!.value
     };
   }
 
@@ -107,9 +88,5 @@ export class PlateMapUpdateComponent implements OnInit {
 
   protected onSaveError(): void {
     this.isSaving = false;
-  }
-
-  trackById(index: number, item: IActivity): any {
-    return item.id;
   }
 }

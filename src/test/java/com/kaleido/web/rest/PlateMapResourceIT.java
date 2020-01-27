@@ -52,6 +52,9 @@ public class PlateMapResourceIT {
     private static final String DEFAULT_CHECKSUM = "AAAAAAAAAA";
     private static final String UPDATED_CHECKSUM = "BBBBBBBBBB";
 
+    private static final String DEFAULT_ACTIVITY_NAME = "AAAAAAAAAA";
+    private static final String UPDATED_ACTIVITY_NAME = "BBBBBBBBBB";
+
     private static final String DEFAULT_DATA = "AAAAAAAAAA";
     private static final String UPDATED_DATA = "BBBBBBBBBB";
 
@@ -108,6 +111,7 @@ public class PlateMapResourceIT {
             .status(DEFAULT_STATUS)
             .lastModified(DEFAULT_LAST_MODIFIED)
             .checksum(DEFAULT_CHECKSUM)
+            .activityName(DEFAULT_ACTIVITY_NAME)
             .data(DEFAULT_DATA);
         return plateMap;
     }
@@ -122,6 +126,7 @@ public class PlateMapResourceIT {
             .status(UPDATED_STATUS)
             .lastModified(UPDATED_LAST_MODIFIED)
             .checksum(UPDATED_CHECKSUM)
+            .activityName(UPDATED_ACTIVITY_NAME)
             .data(UPDATED_DATA);
         return plateMap;
     }
@@ -149,6 +154,7 @@ public class PlateMapResourceIT {
         assertThat(testPlateMap.getStatus()).isEqualTo(DEFAULT_STATUS);
         assertThat(testPlateMap.getLastModified()).isEqualTo(DEFAULT_LAST_MODIFIED);
         assertThat(testPlateMap.getChecksum()).isEqualTo(DEFAULT_CHECKSUM);
+        assertThat(testPlateMap.getActivityName()).isEqualTo(DEFAULT_ACTIVITY_NAME);
         assertThat(testPlateMap.getData()).isEqualTo(DEFAULT_DATA);
 
         // Validate the PlateMap in Elasticsearch
@@ -192,6 +198,7 @@ public class PlateMapResourceIT {
             .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
             .andExpect(jsonPath("$.[*].lastModified").value(hasItem(sameInstant(DEFAULT_LAST_MODIFIED))))
             .andExpect(jsonPath("$.[*].checksum").value(hasItem(DEFAULT_CHECKSUM)))
+            .andExpect(jsonPath("$.[*].activityName").value(hasItem(DEFAULT_ACTIVITY_NAME)))
             .andExpect(jsonPath("$.[*].data").value(hasItem(DEFAULT_DATA)));
     }
     
@@ -209,6 +216,7 @@ public class PlateMapResourceIT {
             .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
             .andExpect(jsonPath("$.lastModified").value(sameInstant(DEFAULT_LAST_MODIFIED)))
             .andExpect(jsonPath("$.checksum").value(DEFAULT_CHECKSUM))
+            .andExpect(jsonPath("$.activityName").value(DEFAULT_ACTIVITY_NAME))
             .andExpect(jsonPath("$.data").value(DEFAULT_DATA));
     }
 
@@ -236,6 +244,7 @@ public class PlateMapResourceIT {
             .status(UPDATED_STATUS)
             .lastModified(UPDATED_LAST_MODIFIED)
             .checksum(UPDATED_CHECKSUM)
+            .activityName(UPDATED_ACTIVITY_NAME)
             .data(UPDATED_DATA);
 
         restPlateMapMockMvc.perform(put("/api/plate-maps")
@@ -250,6 +259,7 @@ public class PlateMapResourceIT {
         assertThat(testPlateMap.getStatus()).isEqualTo(UPDATED_STATUS);
         assertThat(testPlateMap.getLastModified()).isEqualTo(UPDATED_LAST_MODIFIED);
         assertThat(testPlateMap.getChecksum()).isEqualTo(UPDATED_CHECKSUM);
+        assertThat(testPlateMap.getActivityName()).isEqualTo(UPDATED_ACTIVITY_NAME);
         assertThat(testPlateMap.getData()).isEqualTo(UPDATED_DATA);
 
         // Validate the PlateMap in Elasticsearch
@@ -313,6 +323,7 @@ public class PlateMapResourceIT {
             .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
             .andExpect(jsonPath("$.[*].lastModified").value(hasItem(sameInstant(DEFAULT_LAST_MODIFIED))))
             .andExpect(jsonPath("$.[*].checksum").value(hasItem(DEFAULT_CHECKSUM)))
+            .andExpect(jsonPath("$.[*].activityName").value(hasItem(DEFAULT_ACTIVITY_NAME)))
             .andExpect(jsonPath("$.[*].data").value(hasItem(DEFAULT_DATA)));
     }
 }

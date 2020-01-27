@@ -16,6 +16,11 @@
             "fieldType": "String"
         },
         {
+            "fieldName": "activityName",
+            "javadoc": "The name of the activity. Used for grouping on",
+            "fieldType": "String"
+        },
+        {
             "fieldName": "data",
             "javadoc": "The data field is a gzip -> base64 encoded string of the plate map data",
             "fieldType": "String",
@@ -25,15 +30,7 @@
             "fieldValidateRulesMaxlength": 10485760
         }
     ],
-    "relationships": [
-        {
-            "relationshipType": "many-to-one",
-            "otherEntityName": "activity",
-            "otherEntityRelationshipName": "platemap",
-            "relationshipName": "activity",
-            "otherEntityField": "id"
-        }
-    ],
+    "relationships": [],
     "changelogDate": "20200116153934",
     "entityTableName": "plate_map",
     "dto": "no",

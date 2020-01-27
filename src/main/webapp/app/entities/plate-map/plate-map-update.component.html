@@ -28,6 +28,11 @@
                            formControlName="checksum"/>
                 </div>
                 <div class="form-group">
+                    <label class="form-control-label" for="field_activityName" ngbTooltip="The name of the activity. Used for grouping on">Activity Name</label>
+                    <input type="text" class="form-control" name="activityName" id="field_activityName"
+                           formControlName="activityName"/>
+                </div>
+                <div class="form-group">
                     <label class="form-control-label" for="field_data" ngbTooltip="The data field is a gzip -&gt; base64 encoded string of the plate map data">Data</label>
                     <input type="text" class="form-control" name="data" id="field_data"
                            formControlName="data"/>
@@ -39,13 +44,6 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-control-label" for="field_activity">Activity</label>
-                    <select class="form-control" id="field_activity" name="activity" formControlName="activity">
-                        <option [ngValue]="null"></option>
-                        <option [ngValue]="activityOption.id === editForm.get('activity')!.value?.id ? editForm.get('activity')!.value : activityOption" *ngFor="let activityOption of activities; trackBy: trackById">{{activityOption.id}}</option>
-                    </select>
-                </div>
             </div>
             <div>
                 <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">

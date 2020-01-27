@@ -37,8 +37,8 @@
             <th scope="col" ><span>Status</span></th>
             <th scope="col" ><span>Last Modified</span></th>
             <th scope="col" ><span>Checksum</span></th>
+            <th scope="col" ><span>Activity Name</span></th>
             <th scope="col" ><span>Data</span></th>
-            <th scope="col" ><span>Activity</span></th>
             <th scope="col"></th>
             </tr>
             </thead>
@@ -48,12 +48,8 @@
                 <td>{{plateMap.status}}</td>
                 <td>{{plateMap.lastModified | date:'medium'}}</td>
                 <td>{{plateMap.checksum}}</td>
+                <td>{{plateMap.activityName}}</td>
                 <td>{{plateMap.data}}</td>
-                <td>
-                    <div *ngIf="plateMap.activity">
-                        <a [routerLink]="['/activity', plateMap.activity?.id, 'view' ]" >{{plateMap.activity?.id}}</a>
-                    </div>
-                </td>
                 <td class="text-right">
                     <div class="btn-group">
                         <button type="submit"
