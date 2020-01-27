@@ -17,15 +17,13 @@
                 <dd>
                     <span>{{plateMap.checksum}}</span>
                 </dd>
+                <dt><span ngbTooltip="The name of the activity. Used for grouping on">Activity Name</span></dt>
+                <dd>
+                    <span>{{plateMap.activityName}}</span>
+                </dd>
                 <dt><span ngbTooltip="The data field is a gzip -&gt; base64 encoded string of the plate map data">Data</span></dt>
                 <dd>
                     <span>{{plateMap.data}}</span>
-                </dd>
-                <dt><span>Activity</span></dt>
-                <dd>
-                    <div *ngIf="plateMap.activity">
-                        <a [routerLink]="['/activity', plateMap.activity?.id, 'view']">{{plateMap.activity?.id}}</a>
-                    </div>
                 </dd>
             </dl>
 

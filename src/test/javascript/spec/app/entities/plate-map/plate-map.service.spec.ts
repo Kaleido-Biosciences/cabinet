@@ -25,7 +25,7 @@ describe('Service Tests', () => {
       httpMock = injector.get(HttpTestingController);
       currentDate = moment();
 
-      elemDefault = new PlateMap(0, Status.DRAFT, currentDate, 'AAAAAAA', 'AAAAAAA');
+      elemDefault = new PlateMap(0, Status.DRAFT, currentDate, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA');
     });
 
     describe('Service methods', () => {
@@ -75,6 +75,7 @@ describe('Service Tests', () => {
             status: 'BBBBBB',
             lastModified: currentDate.format(DATE_TIME_FORMAT),
             checksum: 'BBBBBB',
+            activityName: 'BBBBBB',
             data: 'BBBBBB'
           },
           elemDefault
@@ -101,6 +102,7 @@ describe('Service Tests', () => {
             status: 'BBBBBB',
             lastModified: currentDate.format(DATE_TIME_FORMAT),
             checksum: 'BBBBBB',
+            activityName: 'BBBBBB',
             data: 'BBBBBB'
           },
           elemDefault

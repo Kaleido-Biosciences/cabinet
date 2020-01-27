@@ -1,5 +1,4 @@
 package com.kaleido.domain;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -45,16 +44,19 @@ public class PlateMap implements Serializable {
     private String checksum;
 
     /**
+     * The name of the activity. Used for grouping on
+     */
+    @ApiModelProperty(value = "The name of the activity. Used for grouping on")
+    @Column(name = "activity_name")
+    private String activityName;
+
+    /**
      * The data field is a gzip -> base64 encoded string of the plate map data
      */
     @Size(max = 10485760)
     @ApiModelProperty(value = "The data field is a gzip -> base64 encoded string of the plate map data")
     @Column(name = "data", length = 10485760)
     private String data;
-
-    @ManyToOne
-    @JsonIgnoreProperties("platemaps")
-    private Activity activity;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -104,6 +106,19 @@ public class PlateMap implements Serializable {
         this.checksum = checksum;
     }
 
+    public String getActivityName() {
+        return activityName;
+    }
+
+    public PlateMap activityName(String activityName) {
+        this.activityName = activityName;
+        return this;
+    }
+
+    public void setActivityName(String activityName) {
+        this.activityName = activityName;
+    }
+
     public String getData() {
         return data;
     }
@@ -115,19 +130,6 @@ public class PlateMap implements Serializable {
 
     public void setData(String data) {
         this.data = data;
-    }
-
-    public Activity getActivity() {
-        return activity;
-    }
-
-    public PlateMap activity(Activity activity) {
-        this.activity = activity;
-        return this;
-    }
-
-    public void setActivity(Activity activity) {
-        this.activity = activity;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
@@ -154,6 +156,7 @@ public class PlateMap implements Serializable {
             ", status='" + getStatus() + "'" +
             ", lastModified='" + getLastModified() + "'" +
             ", checksum='" + getChecksum() + "'" +
+            ", activityName='" + getActivityName() + "'" +
             ", data='" + getData() + "'" +
             "}";
     }
