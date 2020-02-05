@@ -7,9 +7,12 @@ import com.kaleido.web.rest.errors.BadRequestAlertException;
 
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional; 
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -144,4 +146,16 @@ public class PlateMapResource {
             .stream(plateMapSearchRepository.search(queryStringQuery(query)).spliterator(), false)
             .collect(Collectors.toList());
     }
+    
+    
+    
+    @PostMapping("/plate-maps/details")
+    public ResponseEntity<List<@Valid PlateMap>> getPlateMapByActivityName(@Valid @RequestBody PlateMap plateMap) {
+        log.debug("REST request to get PlateMap : {}", plateMap);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
+        return ResponseEntity.ok(results);
+    }
+    
 }
