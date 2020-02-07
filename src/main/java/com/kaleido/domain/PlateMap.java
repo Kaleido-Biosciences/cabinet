@@ -9,6 +9,7 @@ import javax.validation.constraints.*;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import com.kaleido.domain.enumeration.Status;
 
@@ -159,5 +160,10 @@ public class PlateMap implements Serializable {
             ", activityName='" + getActivityName() + "'" +
             ", data='" + getData() + "'" +
             "}";
+    }
+    
+    public String prepareStringForChecksum() {
+    	DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+    	return getStatus().toString()+getLastModified().format(formatter)+getActivityName()+getData();
     }
 }
