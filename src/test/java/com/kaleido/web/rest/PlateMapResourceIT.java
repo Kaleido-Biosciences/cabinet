@@ -152,7 +152,7 @@ public class PlateMapResourceIT {
         assertThat(plateMapList).hasSize(databaseSizeBeforeCreate + 1);
         PlateMap testPlateMap = plateMapList.get(plateMapList.size() - 1);
         assertThat(testPlateMap.getStatus()).isEqualTo(DEFAULT_STATUS);
-        assertThat(testPlateMap.getLastModified()).isEqualTo(DEFAULT_LAST_MODIFIED);
+        assertThat(testPlateMap.getLastModified()).isEqualTo(ZonedDateTime.now());
         assertThat(testPlateMap.getChecksum()).isEqualTo(DEFAULT_CHECKSUM);
         assertThat(testPlateMap.getActivityName()).isEqualTo(DEFAULT_ACTIVITY_NAME);
         assertThat(testPlateMap.getData()).isEqualTo(DEFAULT_DATA);
@@ -243,7 +243,7 @@ public class PlateMapResourceIT {
         updatedPlateMap
             .status(UPDATED_STATUS)
             .lastModified(UPDATED_LAST_MODIFIED)
-            .checksum(UPDATED_CHECKSUM)
+            .checksum(plateMap.getChecksum())
             .activityName(UPDATED_ACTIVITY_NAME)
             .data(UPDATED_DATA);
 
@@ -258,7 +258,7 @@ public class PlateMapResourceIT {
         PlateMap testPlateMap = plateMapList.get(plateMapList.size() - 1);
         assertThat(testPlateMap.getStatus()).isEqualTo(UPDATED_STATUS);
         assertThat(testPlateMap.getLastModified()).isEqualTo(UPDATED_LAST_MODIFIED);
-        assertThat(testPlateMap.getChecksum()).isEqualTo(UPDATED_CHECKSUM);
+        assertThat(testPlateMap.getChecksum()).isEqualTo(testPlateMap.getChecksum());
         assertThat(testPlateMap.getActivityName()).isEqualTo(UPDATED_ACTIVITY_NAME);
         assertThat(testPlateMap.getData()).isEqualTo(UPDATED_DATA);
 
