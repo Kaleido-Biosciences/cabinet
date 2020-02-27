@@ -260,8 +260,8 @@ public class PlateMapResourceIT {
         assertThat(testPlateMap.getStatus()).isEqualTo(DEFAULT_STATUS);
         assertThat(testPlateMap.getLastModified()).isEqualTo(testPlateMap.getLastModified());
         assertThat(testPlateMap.getChecksum()).isEqualTo(testPlateMap.getChecksum());
-        assertThat(testPlateMap.getActivityName()).isEqualTo(UPDATED_ACTIVITY_NAME);
-        assertThat(testPlateMap.getData()).isEqualTo(UPDATED_DATA);
+        assertThat(testPlateMap.getActivityName()).isEqualTo(DEFAULT_ACTIVITY_NAME);
+        assertThat(testPlateMap.getData()).isEqualTo(DEFAULT_DATA);
 
         // Validate the PlateMap in Elasticsearch
         verify(mockPlateMapSearchRepository, times(1)).save(testPlateMap);
