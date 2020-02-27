@@ -124,8 +124,8 @@ public class PlateMapResourceIT {
     public static PlateMap createUpdatedEntity(EntityManager em) {
         PlateMap plateMap = new PlateMap()
             .status(UPDATED_STATUS)
-            .lastModified(UPDATED_LAST_MODIFIED)
-            .checksum(UPDATED_CHECKSUM)
+            //.lastModified(UPDATED_LAST_MODIFIED)
+            //.checksum(UPDATED_CHECKSUM)
             .activityName(UPDATED_ACTIVITY_NAME)
             .data(UPDATED_DATA);
         return plateMap;
@@ -153,7 +153,7 @@ public class PlateMapResourceIT {
         PlateMap testPlateMap = plateMapList.get(plateMapList.size() - 1);
         assertThat(testPlateMap.getStatus()).isEqualTo(DEFAULT_STATUS);
         assertThat(testPlateMap.getLastModified()).isEqualTo(testPlateMap.getLastModified());
-        assertThat(testPlateMap.getChecksum()).isEqualTo(DEFAULT_CHECKSUM);
+        //assertThat(testPlateMap.getChecksum()).isEqualTo(DEFAULT_CHECKSUM);
         assertThat(testPlateMap.getActivityName()).isEqualTo(DEFAULT_ACTIVITY_NAME);
         assertThat(testPlateMap.getData()).isEqualTo(DEFAULT_DATA);
 
@@ -243,7 +243,7 @@ public class PlateMapResourceIT {
         em.detach(updatedPlateMap);
         updatedPlateMap
             .status(UPDATED_STATUS)
-            .lastModified(UPDATED_LAST_MODIFIED)
+            //.lastModified(UPDATED_LAST_MODIFIED)
             .checksum(checksum)
             .activityName(UPDATED_ACTIVITY_NAME)
             .data(UPDATED_DATA);
