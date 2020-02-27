@@ -238,13 +238,13 @@ public class PlateMapResourceIT {
 
         // Update the plateMap
         PlateMap updatedPlateMap = plateMapRepository.findById(plateMap.getId()).get();
-        String checksum = updatedPlateMap.getChecksum();
+        //String checksum = updatedPlateMap.getChecksum();
         // Disconnect from session so that the updates on updatedPlateMap are not directly saved in db
         em.detach(updatedPlateMap);
         updatedPlateMap
             .status(UPDATED_STATUS)
             //.lastModified(UPDATED_LAST_MODIFIED)
-            .checksum(checksum)
+            //.checksum(checksum)
             .activityName(UPDATED_ACTIVITY_NAME)
             .data(UPDATED_DATA);
 
