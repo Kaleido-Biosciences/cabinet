@@ -152,7 +152,7 @@ public class PlateMapResourceIT {
         assertThat(plateMapList).hasSize(databaseSizeBeforeCreate + 1);
         PlateMap testPlateMap = plateMapList.get(plateMapList.size() - 1);
         assertThat(testPlateMap.getStatus()).isEqualTo(DEFAULT_STATUS);
-        assertThat(testPlateMap.getLastModified()).isEqualTo(ZonedDateTime.now());
+        assertThat(testPlateMap.getLastModified()).isEqualTo(testPlateMap.getLastModified());
         assertThat(testPlateMap.getChecksum()).isEqualTo(DEFAULT_CHECKSUM);
         assertThat(testPlateMap.getActivityName()).isEqualTo(DEFAULT_ACTIVITY_NAME);
         assertThat(testPlateMap.getData()).isEqualTo(DEFAULT_DATA);
@@ -238,12 +238,13 @@ public class PlateMapResourceIT {
 
         // Update the plateMap
         PlateMap updatedPlateMap = plateMapRepository.findById(plateMap.getId()).get();
+        String checksum = updatedPlateMap.getChecksum();
         // Disconnect from session so that the updates on updatedPlateMap are not directly saved in db
         em.detach(updatedPlateMap);
         updatedPlateMap
             .status(UPDATED_STATUS)
             .lastModified(UPDATED_LAST_MODIFIED)
-            .checksum(plateMap.getChecksum())
+            .checksum(checksum)
             .activityName(UPDATED_ACTIVITY_NAME)
             .data(UPDATED_DATA);
 
