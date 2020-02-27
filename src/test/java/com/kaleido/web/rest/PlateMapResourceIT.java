@@ -258,7 +258,7 @@ public class PlateMapResourceIT {
         assertThat(plateMapList).hasSize(databaseSizeBeforeUpdate);
         PlateMap testPlateMap = plateMapList.get(plateMapList.size() - 1);
         assertThat(testPlateMap.getStatus()).isEqualTo(DEFAULT_STATUS);
-        assertThat(testPlateMap.getLastModified()).isEqualTo(UPDATED_LAST_MODIFIED);
+        assertThat(testPlateMap.getLastModified()).isEqualTo(testPlateMap.getLastModified());
         assertThat(testPlateMap.getChecksum()).isEqualTo(testPlateMap.getChecksum());
         assertThat(testPlateMap.getActivityName()).isEqualTo(UPDATED_ACTIVITY_NAME);
         assertThat(testPlateMap.getData()).isEqualTo(UPDATED_DATA);
