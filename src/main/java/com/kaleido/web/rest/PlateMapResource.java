@@ -74,12 +74,13 @@ public class PlateMapResource {
         if (plateMap.getId() != null) {
             throw new BadRequestAlertException("A new plateMap cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        ZonedDateTime currentTime = ZonedDateTime.now();     
+        ZonedDateTime currentTime = ZonedDateTime.now();
         plateMap.setLastModified(currentTime);
         String checksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
         plateMap.setChecksum(checksum);
         PlateMap result = plateMapRepository.save(plateMap);
         plateMapSearchRepository.save(result);
+        
         return new ResponseEntity<String>(checksum,responseHeaders,HttpStatus.CREATED);
     }
 
@@ -110,28 +111,40 @@ public class PlateMapResource {
             Example<@Valid PlateMap> plateMapQuery = Example.of(check, matcher);
             List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
             if(!results.isEmpty()) {
-            	PlateMap completedPlateMap = new PlateMap();
-                ZonedDateTime currentTime = ZonedDateTime.now();
+            	ZonedDateTime currentTime = ZonedDateTime.now();
+            	
+                if(plateMap.getStatus() == Status.COMPLETED) {
+                    //Updates the draft data to latest checksum and data, but leave DRAFT status
+                    plateMap.setStatus(Status.DRAFT);
+                    plateMap.setLastModified(currentTime);
+                    String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
+                    plateMap.setChecksum(draftChecksum);
                 
-                //Updates the draft data to latest checksum and data, but leave DRAFT status
-                plateMap.setStatus(Status.DRAFT);
-                plateMap.setLastModified(currentTime);
-                String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
-                plateMap.setChecksum(draftChecksum);
-                
-                // Create new platemap with the same data but COMPLETED status
-                completedPlateMap.setActivityName(plateMap.getActivityName());
-            	completedPlateMap.setData(plateMap.getData());
-            	completedPlateMap.setLastModified(currentTime);
-            	completedPlateMap.setStatus(Status.COMPLETED);
-            	String completedChecksum = DigestUtils.md5Hex(completedPlateMap.prepareStringForChecksum());
-            	completedPlateMap.setChecksum(completedChecksum);
+                    // Create new platemap with the same data but COMPLETED status
+                    PlateMap completedPlateMap = new PlateMap();
+                    completedPlateMap.setActivityName(plateMap.getActivityName());
+            	    completedPlateMap.setData(plateMap.getData());
+            	    completedPlateMap.setLastModified(currentTime);
+            	    completedPlateMap.setStatus(Status.COMPLETED);
+            	    String completedChecksum = DigestUtils.md5Hex(completedPlateMap.prepareStringForChecksum());
+            	    completedPlateMap.setChecksum(completedChecksum);
 
-        	    List<PlateMap> plateMapList = Arrays.asList(plateMap,completedPlateMap);
-        	    List<PlateMap> result = plateMapRepository.saveAll(plateMapList);
-                plateMapSearchRepository.saveAll(result);
+        	        List<PlateMap> plateMapList = Arrays.asList(plateMap,completedPlateMap);
+        	        List<PlateMap> result = plateMapRepository.saveAll(plateMapList);
+                    plateMapSearchRepository.saveAll(result);
                 
-                return new ResponseEntity<String>(draftChecksum,responseHeaders,HttpStatus.OK);
+                    return new ResponseEntity<String>(draftChecksum,responseHeaders,HttpStatus.OK);
+                }
+                else {
+                	plateMap.setLastModified(currentTime);
+                    String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
+                    plateMap.setChecksum(draftChecksum);
+                    
+                    PlateMap result = plateMapRepository.save(plateMap);
+                    plateMapSearchRepository.save(result);
+                    
+                    return new ResponseEntity<String>(draftChecksum,responseHeaders,HttpStatus.OK);
+                }
             }
             else {
             	return new ResponseEntity<String>("Checksum is not the most recent",responseHeaders,HttpStatus.CONFLICT);
