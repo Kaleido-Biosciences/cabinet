@@ -18,6 +18,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PlateMapRepository extends JpaRepository<PlateMap, Long> {
 
-	//@Query("SELECT pm.activityName, pm.checksum, pm.id, pm.lastModified, pm.status FROM PlateMap pm where pm.activityName = ?1") 
     List<PlateMapDTO> findAllByActivityName(String activityName);
 }
