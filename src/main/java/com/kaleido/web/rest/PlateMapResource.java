@@ -4,6 +4,7 @@ import com.kaleido.domain.PlateMap;
 import com.kaleido.domain.enumeration.Status;
 import com.kaleido.repository.PlateMapRepository;
 import com.kaleido.repository.search.PlateMapSearchRepository;
+import com.kaleido.service.dto.DataDTO;
 import com.kaleido.service.dto.PlateMapDTO;
 import com.kaleido.web.rest.errors.BadRequestAlertException;
 
@@ -206,12 +207,35 @@ public class PlateMapResource {
             .collect(Collectors.toList());
     }
     
-    
-    
+    //This api can consolidate the next 2 api into one
     @PostMapping("/plate-maps/details")
     public ResponseEntity<List<@Valid PlateMap>> getPlateMapByActivityName(@Valid @RequestBody PlateMap plateMap) {
         log.debug("REST request to get PlateMap : {}", plateMap);
         ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
+        return ResponseEntity.ok(results);
+    }
+    
+    @GetMapping("/plate-maps/data/draft/{activityName}")
+    public ResponseEntity<@Valid DataDTO> getDraftPlateMapDataByActivityName(@PathVariable String activityName) {
+        log.debug("REST request to get PlateMap draft data: {}", activityName);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        PlateMap plateMap = new PlateMap();
+        plateMap.setActivityName(activityName);
+        plateMap.setStatus(Status.DRAFT);
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        //List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
+        Optional<@Valid DataDTO> results = plateMapRepository.findDataByActivityName(activityName);
+        //return ResponseEntity.ok(results);
+        return ResponseUtil.wrapOrNotFound(results);
+    }
+    
+    @PostMapping("/plate-maps/data/completed")
+    public ResponseEntity<List<@Valid PlateMap>> getDraftPlateMapDataByActivityNameAndTimestamp(@Valid @RequestBody PlateMap plateMap) {
+    	log.debug("REST request to get PlateMap completed data: {}", plateMap);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        plateMap.setStatus(Status.COMPLETED);
         Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
         List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
         return ResponseEntity.ok(results);
