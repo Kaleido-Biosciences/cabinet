@@ -7,6 +7,8 @@ import com.kaleido.service.dto.PlateMapDTO;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,5 +23,5 @@ public interface PlateMapRepository extends JpaRepository<PlateMap, Long> {
 
     List<PlateMapDTO> findAllByActivityName(String activityName);
     
-    Optional<DataDTO> findDataByActivityName(String activityName);
+    Optional<@Valid PlateMap> findDataByActivityName(String activityName);
 }
