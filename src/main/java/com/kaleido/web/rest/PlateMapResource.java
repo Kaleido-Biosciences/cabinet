@@ -123,23 +123,23 @@ public class PlateMapResource {
                     // Create new platemap with the same data but COMPLETED status
                     PlateMap completedPlateMap = new PlateMap();
                     completedPlateMap.setActivityName(plateMap.getActivityName());
-            	    completedPlateMap.setData(plateMap.getData());
-            	    completedPlateMap.setLastModified(currentTime);
-            	    completedPlateMap.setStatus(Status.COMPLETED);
-            	    String completedChecksum = DigestUtils.md5Hex(completedPlateMap.prepareStringForChecksum());
-            	    completedPlateMap.setChecksum(completedChecksum);
+                    completedPlateMap.setData(plateMap.getData());
+                    completedPlateMap.setLastModified(currentTime);
+                    completedPlateMap.setStatus(Status.COMPLETED);
+                    String completedChecksum = DigestUtils.md5Hex(completedPlateMap.prepareStringForChecksum());
+                    completedPlateMap.setChecksum(completedChecksum);
 
-        	        List<PlateMap> plateMapList = Arrays.asList(plateMap,completedPlateMap);
-        	        List<PlateMap> result = plateMapRepository.saveAll(plateMapList);
+                    List<PlateMap> plateMapList = Arrays.asList(plateMap,completedPlateMap);
+                    List<PlateMap> result = plateMapRepository.saveAll(plateMapList);
                     plateMapSearchRepository.saveAll(result);
-                
+
                     return new ResponseEntity<String>(draftChecksum,responseHeaders,HttpStatus.OK);
                 }
                 else {
-                	plateMap.setLastModified(currentTime);
+                    plateMap.setLastModified(currentTime);
                     String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
                     plateMap.setChecksum(draftChecksum);
-                    
+
                     PlateMap result = plateMapRepository.save(plateMap);
                     plateMapSearchRepository.save(result);
                     
