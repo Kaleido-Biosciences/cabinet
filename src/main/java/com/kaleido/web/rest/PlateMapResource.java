@@ -60,7 +60,7 @@ public class PlateMapResource {
 
     public PlateMapResource(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository, PlateMapService plateMapService) {
         this.plateMapService = plateMapService;
-		this.plateMapRepository = plateMapRepository;
+        this.plateMapRepository = plateMapRepository;
         this.plateMapSearchRepository = plateMapSearchRepository;
     }
 

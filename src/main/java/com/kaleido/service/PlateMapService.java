@@ -44,11 +44,11 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 
 public class PlateMapService {
 	
-	private final Logger log = LoggerFactory.getLogger(PlateMapResource.class);
+    private final Logger log = LoggerFactory.getLogger(PlateMapResource.class);
 
     private static final String ENTITY_NAME = "plateMap";
     
-	private final PlateMapRepository plateMapRepository;
+    private final PlateMapRepository plateMapRepository;
 
     private final PlateMapSearchRepository plateMapSearchRepository;
     
@@ -60,12 +60,12 @@ public class PlateMapService {
     public ResponseEntity<String> updatePlateMap(PlateMap plateMap) {
     	log.debug("Platemap data is ", plateMap);
     	
-    	HttpHeaders responseHeaders = new HttpHeaders();
+        HttpHeaders responseHeaders = new HttpHeaders();
         if (plateMap.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
         else {
-        	//Retrieve data from database based on id, activity name, and checksum to check for latest value
+            //Retrieve data from database based on id, activity name, and checksum to check for latest value
             PlateMap check = new PlateMap();
             check.setId(plateMap.getId());
             check.setActivityName(plateMap.getActivityName());
@@ -75,7 +75,7 @@ public class PlateMapService {
             Example<@Valid PlateMap> plateMapQuery = Example.of(check, matcher);
             List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
             if(!results.isEmpty()) {
-            	ZonedDateTime currentTime = ZonedDateTime.now();
+                ZonedDateTime currentTime = ZonedDateTime.now();
             	
                 if(plateMap.getStatus() == Status.COMPLETED) {
                     //Updates the draft data to latest checksum and data, but leave DRAFT status
@@ -111,9 +111,8 @@ public class PlateMapService {
                 }
             }
             else {
-            	return new ResponseEntity<String>("Checksum is not the most recent",responseHeaders,HttpStatus.CONFLICT);
+                return new ResponseEntity<String>("Checksum is not the most recent",responseHeaders,HttpStatus.CONFLICT);
             }
         }
     }
-
 }
