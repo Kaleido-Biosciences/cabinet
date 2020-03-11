@@ -7,8 +7,6 @@ import com.kaleido.domain.enumeration.Status;
 import com.kaleido.repository.PlateMapRepository;
 import com.kaleido.repository.search.PlateMapSearchRepository;
 import com.kaleido.service.dto.PlateMapDTO;
-import com.kaleido.web.rest.PlateMapResource;
-import com.kaleido.web.rest.errors.BadRequestAlertException;
 
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -43,8 +41,6 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 @Service
 
 public class PlateMapService {
-	
-    private final Logger log = LoggerFactory.getLogger(PlateMapResource.class);
 
     private static final String ENTITY_NAME = "plateMap";
     
@@ -62,7 +58,8 @@ public class PlateMapService {
     	
         HttpHeaders responseHeaders = new HttpHeaders();
         if (plateMap.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        	return new ResponseEntity<String>("Invalid ID",responseHeaders,HttpStatus.BAD_REQUEST);
+            //throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
         else {
             //Retrieve data from database based on id, activity name, and checksum to check for latest value
