@@ -60,7 +60,7 @@ public class PlateMapService {
     	
         HttpHeaders responseHeaders = new HttpHeaders();
         if (plateMap.getId() == null) {
-        	return new ResponseEntity<String>("Invalid ID",responseHeaders,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<String>("Invalid ID",responseHeaders,HttpStatus.BAD_REQUEST);
             //throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
         else {
