@@ -41,6 +41,8 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 @Service
 
 public class PlateMapService {
+	
+    private final Logger log = LoggerFactory.getLogger(PlateMapService.class);
 
     private static final String ENTITY_NAME = "plateMap";
     
