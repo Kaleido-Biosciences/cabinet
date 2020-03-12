@@ -112,8 +112,8 @@ public class PlateMapResourceIT {
     public static PlateMap createEntity(EntityManager em) {
         PlateMap plateMap = new PlateMap()
             .status(DEFAULT_STATUS)
-            //.lastModified(DEFAULT_LAST_MODIFIED)
-            //.checksum(DEFAULT_CHECKSUM)
+            .lastModified(DEFAULT_LAST_MODIFIED)
+            .checksum(DEFAULT_CHECKSUM)
             .activityName(DEFAULT_ACTIVITY_NAME)
             .data(DEFAULT_DATA);
         return plateMap;
