@@ -98,7 +98,7 @@ public class PlateMapService {
 
                     return new ResponseEntity<String>(draftChecksum,responseHeaders,HttpStatus.OK);
                 }
-                else {
+                else if(plateMap.getStatus() == Status.DRAFT) {
                     plateMap.setLastModified(currentTime);
                     String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
                     plateMap.setChecksum(draftChecksum);
@@ -107,6 +107,9 @@ public class PlateMapService {
                     plateMapSearchRepository.save(result);
                     
                     return new ResponseEntity<String>(draftChecksum,responseHeaders,HttpStatus.OK);
+                }
+                else {
+                	return new ResponseEntity<String>("No status is sent",responseHeaders,HttpStatus.BAD_REQUEST);
                 }
             }
             else {
