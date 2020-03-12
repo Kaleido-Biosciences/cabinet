@@ -4,6 +4,7 @@ import com.kaleido.CabinetApp;
 import com.kaleido.domain.PlateMap;
 import com.kaleido.repository.PlateMapRepository;
 import com.kaleido.repository.search.PlateMapSearchRepository;
+import com.kaleido.service.PlateMapService;
 import com.kaleido.web.rest.errors.ExceptionTranslator;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -87,11 +88,13 @@ public class PlateMapResourceIT {
     private MockMvc restPlateMapMockMvc;
 
     private PlateMap plateMap;
+    
+    private PlateMapService plateMapService;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final PlateMapResource plateMapResource = new PlateMapResource(plateMapRepository, mockPlateMapSearchRepository);
+        final PlateMapResource plateMapResource = new PlateMapResource(plateMapRepository, mockPlateMapSearchRepository, plateMapService);
         this.restPlateMapMockMvc = MockMvcBuilders.standaloneSetup(plateMapResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)

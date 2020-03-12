@@ -1,7 +1,13 @@
 package com.kaleido.repository;
 
 import com.kaleido.domain.PlateMap;
+import com.kaleido.service.dto.PlateMapDTO;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 
@@ -12,4 +18,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PlateMapRepository extends JpaRepository<PlateMap, Long> {
 
+    List<PlateMapDTO> findAllByActivityName(String activityName);
 }

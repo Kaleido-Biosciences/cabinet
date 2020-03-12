@@ -1,8 +1,11 @@
 package com.kaleido.web.rest;
 
 import com.kaleido.domain.PlateMap;
+import com.kaleido.domain.enumeration.Status;
 import com.kaleido.repository.PlateMapRepository;
 import com.kaleido.repository.search.PlateMapSearchRepository;
+import com.kaleido.service.PlateMapService;
+import com.kaleido.service.dto.PlateMapDTO;
 import com.kaleido.web.rest.errors.BadRequestAlertException;
 
 import io.github.jhipster.web.util.HeaderUtil;
@@ -26,6 +29,7 @@ import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,8 +55,11 @@ public class PlateMapResource {
     private final PlateMapRepository plateMapRepository;
 
     private final PlateMapSearchRepository plateMapSearchRepository;
+    
+    private final PlateMapService plateMapService;
 
-    public PlateMapResource(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository) {
+    public PlateMapResource(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository, PlateMapService plateMapService) {
+        this.plateMapService = plateMapService;
         this.plateMapRepository = plateMapRepository;
         this.plateMapSearchRepository = plateMapSearchRepository;
     }
@@ -71,12 +78,13 @@ public class PlateMapResource {
         if (plateMap.getId() != null) {
             throw new BadRequestAlertException("A new plateMap cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        ZonedDateTime currentTime = ZonedDateTime.now();     
+        ZonedDateTime currentTime = ZonedDateTime.now();
         plateMap.setLastModified(currentTime);
         String checksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
         plateMap.setChecksum(checksum);
         PlateMap result = plateMapRepository.save(plateMap);
         plateMapSearchRepository.save(result);
+        
         return new ResponseEntity<String>(checksum,responseHeaders,HttpStatus.CREATED);
     }
 
@@ -92,33 +100,7 @@ public class PlateMapResource {
     @PutMapping("/plate-maps")
     public ResponseEntity<String> updatePlateMap(@Valid @RequestBody PlateMap plateMap) throws URISyntaxException {
         log.debug("REST request to update PlateMap : {}", plateMap);
-        HttpHeaders responseHeaders = new HttpHeaders();
-        if (plateMap.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        else {
-        	//Retrieve data from database based on id, activity name, and checksum to check for latest value
-            PlateMap check = new PlateMap();
-            check.setId(plateMap.getId());
-            check.setActivityName(plateMap.getActivityName());
-            check.setChecksum(plateMap.getChecksum());
-            
-            ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
-            Example<@Valid PlateMap> plateMapQuery = Example.of(check, matcher);
-            List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
-            if(!results.isEmpty()) {
-                ZonedDateTime currentTime = ZonedDateTime.now();
-                plateMap.setLastModified(currentTime);
-                String checksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());   
-                plateMap.setChecksum(checksum);
-        	    PlateMap result = plateMapRepository.save(plateMap);
-                plateMapSearchRepository.save(result);
-                return new ResponseEntity<String>(checksum,responseHeaders,HttpStatus.OK);
-            }
-            else {
-            	return new ResponseEntity<String>("Checksum is not the most recent",responseHeaders,HttpStatus.CONFLICT);
-            }
-        }
+        return plateMapService.updatePlateMap(plateMap);
     }
 
     /**
@@ -184,6 +166,19 @@ public class PlateMapResource {
         Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
         List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
         return ResponseEntity.ok(results);
+    }
+    
+    /**
+     * {@code GET  /plate-map-summary/{activityName} : get the plateMap summary based on activityName
+     *
+     * @param activityName the activityName to be searched.
+     * @return the list of PlateMapDTO Objects.
+     */
+    @GetMapping("/plate-map-summary/{activityName}")
+    public ResponseEntity<List<@Valid PlateMapDTO>> retrievePlateMapSummary(@PathVariable String activityName) {
+        log.debug("REST request to search PlateMaps based on activityName: ", activityName);
+        List<PlateMapDTO> plateMap = plateMapRepository.findAllByActivityName(activityName);
+        return ResponseEntity.ok(plateMap);
     }
     
 }
