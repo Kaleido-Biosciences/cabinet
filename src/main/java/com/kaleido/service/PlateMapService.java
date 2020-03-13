@@ -14,6 +14,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -39,15 +40,16 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 
 @Slf4j
 @Service
-
 public class PlateMapService {
 	
     private final Logger log = LoggerFactory.getLogger(PlateMapService.class);
 
     private static final String ENTITY_NAME = "plateMap";
     
+    @Autowired
     private final PlateMapRepository plateMapRepository;
 
+    @Autowired
     private final PlateMapSearchRepository plateMapSearchRepository;
     
     public PlateMapService(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository) {
