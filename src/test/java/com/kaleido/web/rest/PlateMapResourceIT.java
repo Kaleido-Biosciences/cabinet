@@ -278,8 +278,7 @@ public class PlateMapResourceIT {
         restPlateMapMockMvc.perform(put("/api/plate-maps")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(plateMap)))
-            .andExpect(status().isBadRequest())
-            .andReturn();
+            .andExpect(status().isBadRequest());
 
         // Validate the PlateMap in the database
         List<PlateMap> plateMapList = plateMapRepository.findAll();
