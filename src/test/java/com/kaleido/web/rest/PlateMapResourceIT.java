@@ -89,6 +89,7 @@ public class PlateMapResourceIT {
 
     private PlateMap plateMap;
     
+    @Autowired
     private PlateMapService plateMapService;
 
     @BeforeEach
