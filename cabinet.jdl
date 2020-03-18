@@ -11,13 +11,14 @@ entity PlateMap {
     /**
      * The name of the activity. Used for grouping on
      */
-     activityName String,
+    activityName String,
 
     /**
      * The data field is a gzip -> base64 encoded string of the plate map data
      */
     data String maxlength(10485760)
-	/**
+
+    /**
      * The number of plates that are in the plate map
      */
     numPlates Integer

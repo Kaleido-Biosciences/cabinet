@@ -58,6 +58,9 @@ public class PlateMapResourceIT {
 
     private static final String DEFAULT_DATA = "AAAAAAAAAA";
     private static final String UPDATED_DATA = "BBBBBBBBBB";
+    
+    private static final Integer DEFAULT_NUM_PLATES = 1234;
+    private static final Integer UPDATED_NUM_PLATES = 1234;
 
     @Autowired
     private PlateMapRepository plateMapRepository;
@@ -115,7 +118,8 @@ public class PlateMapResourceIT {
             .lastModified(DEFAULT_LAST_MODIFIED)
             .checksum(DEFAULT_CHECKSUM)
             .activityName(DEFAULT_ACTIVITY_NAME)
-            .data(DEFAULT_DATA);
+            .data(DEFAULT_DATA)
+            .numPlates(DEFAULT_NUM_PLATES);
         return plateMap;
     }
     /**
@@ -281,7 +285,8 @@ public class PlateMapResourceIT {
         restPlateMapMockMvc.perform(put("/api/plate-maps")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(plateMap)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().is4xxClientError());
+
 
         // Validate the PlateMap in the database
         List<PlateMap> plateMapList = plateMapRepository.findAll();
