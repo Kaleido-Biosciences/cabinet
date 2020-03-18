@@ -92,6 +92,7 @@ public class PlateMapResourceIT {
 
     private PlateMap plateMap;
     
+    @Autowired
     private PlateMapService plateMapService;
 
     @BeforeEach
@@ -143,8 +144,8 @@ public class PlateMapResourceIT {
         plateMap = createEntity(em);
     }
 
-    // @Test
-    // @Transactional
+    @Test
+    @Transactional
     public void createPlateMap() throws Exception {
         int databaseSizeBeforeCreate = plateMapRepository.findAll().size();
 
@@ -168,8 +169,8 @@ public class PlateMapResourceIT {
         verify(mockPlateMapSearchRepository, times(1)).save(testPlateMap);
     }
 
-    //  @Test
-    //  @Transactional
+    @Test
+    @Transactional
     public void createPlateMapWithExistingId() throws Exception {
         int databaseSizeBeforeCreate = plateMapRepository.findAll().size();
 
@@ -191,8 +192,8 @@ public class PlateMapResourceIT {
     }
 
 
-    // @Test
-    // @Transactional
+    @Test
+    @Transactional
     public void getAllPlateMaps() throws Exception {
         // Initialize the database
         plateMapRepository.saveAndFlush(plateMap);
@@ -209,8 +210,8 @@ public class PlateMapResourceIT {
             .andExpect(jsonPath("$.[*].data").value(hasItem(DEFAULT_DATA)));
     }
     
-    // @Test
-    // @Transactional
+    @Test
+    @Transactional
     public void getPlateMap() throws Exception {
         // Initialize the database
         plateMapRepository.saveAndFlush(plateMap);
@@ -274,8 +275,8 @@ public class PlateMapResourceIT {
         verify(mockPlateMapSearchRepository, times(1)).save(testPlateMap);
     }*/
 
-    // @Test
-    // @Transactional
+    @Test
+    @Transactional
     public void updateNonExistingPlateMap() throws Exception {
         int databaseSizeBeforeUpdate = plateMapRepository.findAll().size();
 
@@ -296,8 +297,8 @@ public class PlateMapResourceIT {
         verify(mockPlateMapSearchRepository, times(0)).save(plateMap);
     }
 
-    // @Test
-    // @Transactional
+    @Test
+    @Transactional
     public void deletePlateMap() throws Exception {
         // Initialize the database
         plateMapRepository.saveAndFlush(plateMap);
@@ -317,8 +318,8 @@ public class PlateMapResourceIT {
         verify(mockPlateMapSearchRepository, times(1)).deleteById(plateMap.getId());
     }
 
-   // @Test
-   // @Transactional
+    @Test
+    @Transactional
     public void searchPlateMap() throws Exception {
         // Initialize the database
         plateMapRepository.saveAndFlush(plateMap);
