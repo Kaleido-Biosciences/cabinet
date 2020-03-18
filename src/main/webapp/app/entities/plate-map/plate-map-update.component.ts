@@ -23,7 +23,8 @@ export class PlateMapUpdateComponent implements OnInit {
     lastModified: [],
     checksum: [],
     activityName: [],
-    data: [null, [Validators.maxLength(10485760)]]
+    data: [null, [Validators.maxLength(10485760)]],
+    numPlates: []
   });
 
   constructor(protected plateMapService: PlateMapService, protected activatedRoute: ActivatedRoute, private fb: FormBuilder) {}
@@ -41,7 +42,8 @@ export class PlateMapUpdateComponent implements OnInit {
       lastModified: plateMap.lastModified != null ? plateMap.lastModified.format(DATE_TIME_FORMAT) : null,
       checksum: plateMap.checksum,
       activityName: plateMap.activityName,
-      data: plateMap.data
+      data: plateMap.data,
+      numPlates: plateMap.numPlates
     });
   }
 
@@ -70,7 +72,8 @@ export class PlateMapUpdateComponent implements OnInit {
           : undefined,
       checksum: this.editForm.get(['checksum'])!.value,
       activityName: this.editForm.get(['activityName'])!.value,
-      data: this.editForm.get(['data'])!.value
+      data: this.editForm.get(['data'])!.value,
+      numPlates: this.editForm.get(['numPlates'])!.value
     };
   }
 

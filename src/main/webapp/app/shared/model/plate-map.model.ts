@@ -8,6 +8,7 @@ export interface IPlateMap {
   checksum?: string;
   activityName?: string;
   data?: string;
+  numPlates?: number;
 }
 
 export class PlateMap implements IPlateMap {
@@ -17,6 +18,7 @@ export class PlateMap implements IPlateMap {
     public lastModified?: Moment,
     public checksum?: string,
     public activityName?: string,
-    public data?: string
+    public data?: string,
+    public numPlates?: number
   ) {}
 }

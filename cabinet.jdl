@@ -17,6 +17,10 @@ entity PlateMap {
      * The data field is a gzip -> base64 encoded string of the plate map data
      */
     data String maxlength(10485760)
+	/**
+     * The number of plates that are in the plate map
+     */
+    numPlates Integer
 }
 
 enum Status {

@@ -74,17 +74,11 @@ public class PlateMapResource {
     @PostMapping("/plate-maps")
     public ResponseEntity<String> createPlateMap(@Valid @RequestBody PlateMap plateMap) throws URISyntaxException {
         log.debug("REST request to save PlateMap : {}", plateMap);
-        HttpHeaders responseHeaders = new HttpHeaders();
-        if (plateMap.getId() != null) {
+        if(plateMap.getId() != null) {
             throw new BadRequestAlertException("A new plateMap cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        ZonedDateTime currentTime = ZonedDateTime.now();
-        plateMap.setLastModified(currentTime);
-        String checksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
-        plateMap.setChecksum(checksum);
-        PlateMap result = plateMapRepository.save(plateMap);
-        plateMapSearchRepository.save(result);
-        
+        HttpHeaders responseHeaders = new HttpHeaders();
+        String checksum = plateMapService.savePlateMap(plateMap);
         return new ResponseEntity<String>(checksum,responseHeaders,HttpStatus.CREATED);
     }
 
