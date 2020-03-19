@@ -7,6 +7,7 @@ import com.kaleido.domain.enumeration.Status;
 import com.kaleido.repository.PlateMapRepository;
 import com.kaleido.repository.search.PlateMapSearchRepository;
 import com.kaleido.service.dto.PlateMapDTO;
+import com.kaleido.util.DataUtillity;
 
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -82,6 +83,7 @@ public class PlateMapService {
                     plateMap.setLastModified(currentTime);
                     String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
                     plateMap.setChecksum(draftChecksum);
+                    plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
                 
                     // Create new platemap with the same data but COMPLETED status
                     PlateMap completedPlateMap = new PlateMap();
@@ -89,6 +91,7 @@ public class PlateMapService {
                     completedPlateMap.setData(plateMap.getData());
                     completedPlateMap.setLastModified(currentTime);
                     completedPlateMap.setStatus(Status.COMPLETED);
+                    completedPlateMap.setNumPlates(plateMap.getNumPlates());
                     String completedChecksum = DigestUtils.md5Hex(completedPlateMap.prepareStringForChecksum());
                     completedPlateMap.setChecksum(completedChecksum);
 
@@ -102,7 +105,7 @@ public class PlateMapService {
                     plateMap.setLastModified(currentTime);
                     String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
                     plateMap.setChecksum(draftChecksum);
-
+                    plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
                     PlateMap result = plateMapRepository.save(plateMap);
                     plateMapSearchRepository.save(result);
                     
@@ -113,5 +116,16 @@ public class PlateMapService {
                 return new ResponseEntity<String>("Checksum is not the most recent",responseHeaders,HttpStatus.CONFLICT);
             }
         }
+    }
+    
+    public String savePlateMap(PlateMap plateMap) {
+        ZonedDateTime currentTime = ZonedDateTime.now();
+        plateMap.setLastModified(currentTime);
+        String checksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
+        plateMap.setChecksum(checksum);
+        plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
+        PlateMap result = plateMapRepository.save(plateMap);
+        plateMapSearchRepository.save(result);
+        return checksum;
     }
 }

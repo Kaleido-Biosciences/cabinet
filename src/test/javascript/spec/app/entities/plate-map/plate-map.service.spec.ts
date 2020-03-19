@@ -76,7 +76,8 @@ describe('Service Tests', () => {
             lastModified: currentDate.format(DATE_TIME_FORMAT),
             checksum: 'BBBBBB',
             activityName: 'BBBBBB',
-            data: 'BBBBBB'
+            data: 'BBBBBB',
+            numPlates: 1
           },
           elemDefault
         );
@@ -103,7 +104,8 @@ describe('Service Tests', () => {
             lastModified: currentDate.format(DATE_TIME_FORMAT),
             checksum: 'BBBBBB',
             activityName: 'BBBBBB',
-            data: 'BBBBBB'
+            data: 'BBBBBB',
+            numPlates: 1
           },
           elemDefault
         );

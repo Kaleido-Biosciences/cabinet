@@ -43,7 +43,11 @@
                         </small>
                     </div>
                 </div>
-
+                <div class="form-group">
+                    <label class="form-control-label" for="field_numPlates" ngbTooltip="The number of plates that are in the plate map">Num Plates</label>
+                    <input type="number" class="form-control" name="numPlates" id="field_numPlates"
+                           formControlName="numPlates"/>
+                </div>
             </div>
             <div>
                 <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">
