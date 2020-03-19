@@ -58,7 +58,14 @@ public class PlateMap implements Serializable {
     @ApiModelProperty(value = "The data field is a gzip -> base64 encoded string of the plate map data")
     @Column(name = "data", length = 10485760)
     private String data;
-
+    
+    /**
+     * The number of plates that are in the platemap
+     */
+    @ApiModelProperty(value = "The number of plates that are in the platemap")
+    @Column(name = "num_plates")
+    private Integer numPlates;
+    
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
         return id;
@@ -134,6 +141,19 @@ public class PlateMap implements Serializable {
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
+    public Integer getNumPlates() {
+        return numPlates;
+    }
+    
+    public PlateMap numPlates(Integer numPlates) {
+        this.numPlates = numPlates;
+        return this;
+    }
+    
+    public void setNumPlates(Integer numPlates) {
+        this.numPlates = numPlates;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -157,6 +177,7 @@ public class PlateMap implements Serializable {
             ", status='" + getStatus() + "'" +
             ", lastModified='" + getLastModified() + "'" +
             ", checksum='" + getChecksum() + "'" +
+            ", numPlates='" + getNumPlates() + "'" +
             ", activityName='" + getActivityName() + "'" +
             ", data='" + getData() + "'" +
             "}";
