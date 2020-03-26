@@ -2,10 +2,17 @@ package com.kaleido.service;
 
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+
+import com.amazonaws.services.s3.model.PutObjectResult;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kaleido.config.Constants;
 import com.kaleido.domain.PlateMap;
 import com.kaleido.domain.enumeration.Status;
 import com.kaleido.repository.PlateMapRepository;
 import com.kaleido.repository.search.PlateMapSearchRepository;
+import com.kaleido.service.amazonaws.s3.CabinetS3Client;
+import com.kaleido.service.amazonaws.s3.CabinetS3Exception;
 import com.kaleido.service.dto.PlateMapDTO;
 import com.kaleido.util.DataUtillity;
 
@@ -33,6 +40,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -42,41 +50,41 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 @Service
 
 public class PlateMapService {
-	
+
     private final Logger log = LoggerFactory.getLogger(PlateMapService.class);
 
     private static final String ENTITY_NAME = "plateMap";
-    
     private final PlateMapRepository plateMapRepository;
-
     private final PlateMapSearchRepository plateMapSearchRepository;
-    
-    public PlateMapService(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository) {
-    	this.plateMapRepository = plateMapRepository;
-    	this.plateMapSearchRepository = plateMapSearchRepository;
+    private final CabinetS3Client cabinetS3Client;
+
+    public PlateMapService(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository, CabinetS3Client cabinetS3Client) {
+        this.plateMapRepository = plateMapRepository;
+        this.plateMapSearchRepository = plateMapSearchRepository;
+        this.cabinetS3Client = cabinetS3Client;
     }
-    
+
     public ResponseEntity<String> updatePlateMap(PlateMap plateMap) {
-    	log.debug("Platemap data is ", plateMap);
-    	
+        log.debug("Platemap data is ", plateMap);
+
         HttpHeaders responseHeaders = new HttpHeaders();
-        if (plateMap.getId() == null) {
+        if(plateMap.getId() == null){
             return new ResponseEntity<String>("Invalid ID",responseHeaders,HttpStatus.BAD_REQUEST);
             //throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        else {
+        else{
             //Retrieve data from database based on id, activity name, and checksum to check for latest value
             PlateMap check = new PlateMap();
             check.setId(plateMap.getId());
             check.setActivityName(plateMap.getActivityName());
             check.setChecksum(plateMap.getChecksum());
-            
+
             ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
             Example<@Valid PlateMap> plateMapQuery = Example.of(check, matcher);
             List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
             if(!results.isEmpty()) {
                 ZonedDateTime currentTime = ZonedDateTime.now();
-            	
+
                 if(plateMap.getStatus() == Status.COMPLETED) {
                     //Updates the draft data to latest checksum and data, but leave DRAFT status
                     plateMap.setStatus(Status.DRAFT);
@@ -84,7 +92,7 @@ public class PlateMapService {
                     String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
                     plateMap.setChecksum(draftChecksum);
                     plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
-                
+
                     // Create new platemap with the same data but COMPLETED status
                     PlateMap completedPlateMap = new PlateMap();
                     completedPlateMap.setActivityName(plateMap.getActivityName());
@@ -101,23 +109,22 @@ public class PlateMapService {
 
                     return new ResponseEntity<String>(draftChecksum,responseHeaders,HttpStatus.OK);
                 }
-                else {
+                else{
                     plateMap.setLastModified(currentTime);
                     String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
                     plateMap.setChecksum(draftChecksum);
                     plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
                     PlateMap result = plateMapRepository.save(plateMap);
                     plateMapSearchRepository.save(result);
-                    
                     return new ResponseEntity<String>(draftChecksum,responseHeaders,HttpStatus.OK);
                 }
             }
-            else {
+            else{
                 return new ResponseEntity<String>("Checksum is not the most recent",responseHeaders,HttpStatus.CONFLICT);
             }
         }
     }
-    
+
     public String savePlateMap(PlateMap plateMap) {
         ZonedDateTime currentTime = ZonedDateTime.now();
         plateMap.setLastModified(currentTime);
@@ -126,6 +133,22 @@ public class PlateMapService {
         plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
         PlateMap result = plateMapRepository.save(plateMap);
         plateMapSearchRepository.save(result);
+        if(!plateMap.getStatus().equals(Constants.PLATEMAP_DRAFT_STATUS)) {
+            exportPlate(plateMap);
+        }
         return checksum;
+    }
+
+    private void exportPlate(PlateMap platemap) {
+        CompletableFuture.runAsync(() -> {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                cabinetS3Client.writeToS3(cabinetS3Client.getPlateMapFileName(platemap.getActivityName()), mapper.writeValueAsString(platemap));
+            } catch (CabinetS3Exception e) {
+                log.error("Error occured in putting platemap to s3 "+e.getMessage());
+            } catch (JsonProcessingException e) {
+                log.error("Error occured in converting platemap object to json"+e.getMessage());
+            }
+        });
     }
 }
