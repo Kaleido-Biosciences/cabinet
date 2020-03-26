@@ -28,6 +28,11 @@
                 "maxlength"
             ],
             "fieldValidateRulesMaxlength": 10485760
+        },
+        {
+            "fieldName": "numPlates",
+            "javadoc": "The number of plates that are in the plate map",
+            "fieldType": "Integer"
         }
     ],
     "relationships": [],

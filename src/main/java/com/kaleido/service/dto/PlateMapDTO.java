@@ -15,6 +15,7 @@ public class PlateMapDTO {
 	private Long id;
 	private ZonedDateTime lastModified;
 	private Status status;
+	private int numPlates;
 	
 	public PlateMapDTO() {
         // Empty constructor needed for Jackson.
@@ -26,6 +27,7 @@ public class PlateMapDTO {
         this.checksum = plateMap.getChecksum();
         this.lastModified = plateMap.getLastModified();
         this.status = plateMap.getStatus();
+        this.numPlates = plateMap.getNumPlates();
     }
     
     public Long getId() {
@@ -68,11 +70,20 @@ public class PlateMapDTO {
     	this.status = status;
     }
     
+    public int getNumPlates() {
+        return numPlates;
+    }
+
+    public void setNumPlates(int numPlates) {
+        this.numPlates = numPlates;
+    }
+
     @Override
     public String toString() {
     	return "PlateMapDTO{" +
     			"activityName='" + activityName + '\'' +
                 ", checksum='" + checksum + '\'' +
+                ", numPlates='" + numPlates + '\'' +
                 ", lastModified='" + lastModified + '\'' +
                 ", status=" + status +
                 "}";
