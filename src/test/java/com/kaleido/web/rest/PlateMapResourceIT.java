@@ -288,7 +288,6 @@ public class PlateMapResourceIT {
             .content(TestUtil.convertObjectToJsonBytes(plateMap)))
             .andExpect(status().is4xxClientError());
 
-
         // Validate the PlateMap in the database
         List<PlateMap> plateMapList = plateMapRepository.findAll();
         assertThat(plateMapList).hasSize(databaseSizeBeforeUpdate);

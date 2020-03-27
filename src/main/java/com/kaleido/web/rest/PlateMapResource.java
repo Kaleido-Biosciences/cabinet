@@ -151,8 +151,6 @@ public class PlateMapResource {
             .collect(Collectors.toList());
     }
     
-    
-    
     @PostMapping("/plate-maps/details")
     public ResponseEntity<List<@Valid PlateMap>> getPlateMapByActivityName(@Valid @RequestBody PlateMap plateMap) {
         log.debug("REST request to get PlateMap : {}", plateMap);
@@ -160,6 +158,17 @@ public class PlateMapResource {
         Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
         List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
         return ResponseEntity.ok(results);
+    }
+    
+    @GetMapping("/plate-maps/data/{checksum}")
+    public ResponseEntity<@Valid PlateMap> getDraftPlateMapDataByActivityName(@PathVariable String checksum) {
+        log.debug("REST request to get PlateMap draft data: {}", checksum);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        PlateMap plateMap = new PlateMap();
+        plateMap.setChecksum(checksum);
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        Optional<@Valid PlateMap> results = plateMapRepository.findOne(plateMapQuery);
+        return ResponseUtil.wrapOrNotFound(results);
     }
     
     /**
