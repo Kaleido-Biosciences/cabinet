@@ -105,6 +105,14 @@ will generate few files:
     create src/main/webapp/app/my-component/my-component.component.ts
     update src/main/webapp/app/app.module.ts
 
+### Amazon S3 settings
+
+You need to add below three variables in environmental variables to enable Amazon S3 capabilities
+
+1. AWS_ACCESS_KEY_ID
+2. AWS_SECRET_ACCESS_KEY
+3. platemap_export_bucket (Bucket name)
+
 ## Building for production
 
 ### Packaging as jar

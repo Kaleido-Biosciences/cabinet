@@ -1,7 +1,5 @@
 package com.kaleido.service.amazonaws.s3;
 
-import java.sql.Timestamp;
-
 import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
@@ -28,21 +26,13 @@ public class CabinetS3Client {
      * @return
      * @throws CabinetS3Exception
      */
-    public PutObjectResult writeToS3(@NotNull String key, @NotNull String content) throws CabinetS3Exception {
-
-        log.info("request to write with key {} to {}", key, bucketName);
-        PutObjectResult result = null;
+    public void writeToS3(@NotNull String key, @NotNull String content) throws CabinetS3Exception {
         try{
-            result = s3.putObject(bucketName, key, content);
+            s3.putObject(bucketName, key, content);
         }catch(Exception e) {
-            e.printStackTrace();
+            log.error("Error occured in putting the object to Amazon S3:"+e.getMessage());
             throw new CabinetS3Exception(
-                    "Error occured in putting the the object "+key+" to Amazon S3:"+e.getMessage());
+                    "Error occured in putting the object to Amazon S3:"+e.getMessage());
         }
-        return result;
-    }
-
-    public String getPlateMapFileName(String activityName) {
-        return activityName+"_"+new Timestamp(System.currentTimeMillis())+".json";
     }
 }

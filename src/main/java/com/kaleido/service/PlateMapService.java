@@ -143,7 +143,7 @@ public class PlateMapService {
         CompletableFuture.runAsync(() -> {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                cabinetS3Client.writeToS3(cabinetS3Client.getPlateMapFileName(platemap.getActivityName()), mapper.writeValueAsString(platemap));
+                cabinetS3Client.writeToS3(platemap.getActivityName(), mapper.writeValueAsString(platemap));
             } catch (CabinetS3Exception e) {
                 log.error("Error occured in putting platemap to s3 "+e.getMessage());
             } catch (JsonProcessingException e) {
