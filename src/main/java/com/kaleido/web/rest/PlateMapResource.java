@@ -161,7 +161,7 @@ public class PlateMapResource {
     }
     
     @GetMapping("/plate-maps/data/{checksum}")
-    public ResponseEntity<@Valid PlateMap> getDraftPlateMapDataByActivityName(@PathVariable String checksum) {
+    public ResponseEntity<@Valid PlateMap> getCompletedPlateMapDataByChecksum(@PathVariable String checksum) {
         log.debug("REST request to get PlateMap draft data: {}", checksum);
         ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
         PlateMap plateMap = new PlateMap();
@@ -169,6 +169,30 @@ public class PlateMapResource {
         Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
         Optional<@Valid PlateMap> results = plateMapRepository.findOne(plateMapQuery);
         return ResponseUtil.wrapOrNotFound(results);
+    }
+    
+    @GetMapping("/plate-maps/data/draft/{activityName}")
+    public ResponseEntity<@Valid PlateMap> getDraftPlateMapDataByActivityName(@PathVariable String activityName) {
+        log.debug("REST request to get PlateMap draft data: {}", activityName);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        PlateMap plateMap = new PlateMap();
+        plateMap.setActivityName(activityName);
+        plateMap.setStatus(Status.DRAFT);
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        Optional<@Valid PlateMap> results = plateMapRepository.findOne(plateMapQuery);
+        return ResponseUtil.wrapOrNotFound(results);
+    }
+    
+    @GetMapping("/plate-maps/data/completed/{activityName}")
+    public ResponseEntity<List<@Valid PlateMap>> getCompletedPlateMapDataListByActivityName(@PathVariable String activityName) {
+        log.debug("REST request to get PlateMap draft data: {}", activityName);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        PlateMap plateMap = new PlateMap();
+        plateMap.setActivityName(activityName);
+        plateMap.setStatus(Status.COMPLETED);
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
+        return ResponseEntity.ok(results);
     }
     
     /**
