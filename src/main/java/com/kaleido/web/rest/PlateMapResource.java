@@ -14,6 +14,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -56,6 +57,7 @@ public class PlateMapResource {
 
     private final PlateMapSearchRepository plateMapSearchRepository;
     
+    @Autowired
     private final PlateMapService plateMapService;
 
     public PlateMapResource(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository, PlateMapService plateMapService) {
