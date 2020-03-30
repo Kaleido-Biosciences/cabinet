@@ -14,6 +14,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -56,6 +57,7 @@ public class PlateMapResource {
 
     private final PlateMapSearchRepository plateMapSearchRepository;
     
+    @Autowired
     private final PlateMapService plateMapService;
 
     public PlateMapResource(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository, PlateMapService plateMapService) {
@@ -151,12 +153,45 @@ public class PlateMapResource {
             .collect(Collectors.toList());
     }
     
-    
-    
     @PostMapping("/plate-maps/details")
     public ResponseEntity<List<@Valid PlateMap>> getPlateMapByActivityName(@Valid @RequestBody PlateMap plateMap) {
         log.debug("REST request to get PlateMap : {}", plateMap);
         ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
+        return ResponseEntity.ok(results);
+    }
+    
+    @GetMapping("/plate-maps/data/{checksum}")
+    public ResponseEntity<@Valid PlateMap> getCompletedPlateMapDataByChecksum(@PathVariable String checksum) {
+        log.debug("REST request to get PlateMap draft data: {}", checksum);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        PlateMap plateMap = new PlateMap();
+        plateMap.setChecksum(checksum);
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        Optional<@Valid PlateMap> results = plateMapRepository.findOne(plateMapQuery);
+        return ResponseUtil.wrapOrNotFound(results);
+    }
+    
+    @GetMapping("/plate-maps/data/draft/{activityName}")
+    public ResponseEntity<@Valid PlateMap> getDraftPlateMapDataByActivityName(@PathVariable String activityName) {
+        log.debug("REST request to get PlateMap draft data: {}", activityName);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        PlateMap plateMap = new PlateMap();
+        plateMap.setActivityName(activityName);
+        plateMap.setStatus(Status.DRAFT);
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        Optional<@Valid PlateMap> results = plateMapRepository.findOne(plateMapQuery);
+        return ResponseUtil.wrapOrNotFound(results);
+    }
+    
+    @GetMapping("/plate-maps/data/completed/{activityName}")
+    public ResponseEntity<List<@Valid PlateMap>> getCompletedPlateMapDataListByActivityName(@PathVariable String activityName) {
+        log.debug("REST request to get PlateMap draft data: {}", activityName);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        PlateMap plateMap = new PlateMap();
+        plateMap.setActivityName(activityName);
+        plateMap.setStatus(Status.COMPLETED);
         Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
         List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
         return ResponseEntity.ok(results);
