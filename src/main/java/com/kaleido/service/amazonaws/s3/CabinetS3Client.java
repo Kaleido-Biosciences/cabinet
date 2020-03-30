@@ -26,13 +26,15 @@ public class CabinetS3Client {
      * @return
      * @throws CabinetS3Exception
      */
-    public void writeToS3(@NotNull String key, @NotNull String content) throws CabinetS3Exception {
+    public void writeToS3(@NotNull String fileName, @NotNull String content) throws CabinetS3Exception {
         try{
-            s3.putObject(bucketName, key, content);
+            s3.putObject(bucketName, fileName, content);
         }catch(Exception e) {
-            log.error("Error occured in putting the object to Amazon S3:"+e.getMessage());
+            log.error("Error occured in putting the object to Amazon S3 and retrying once again:"+e.getMessage());
+            //As putObject is not throwing or not sending error in the response, Retrying once again for any failure
+            s3.putObject(bucketName, fileName, content);
             throw new CabinetS3Exception(
-                    "Error occured in putting the object to Amazon S3:"+e.getMessage());
+                    "Error occured in putting the object to Amazon S3 and Retrying once again:"+e.getMessage());
         }
     }
 }

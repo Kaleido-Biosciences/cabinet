@@ -11,8 +11,6 @@ public final class Constants {
     public static final String DEFAULT_LANGUAGE = "en";
     public static final String ANONYMOUS_USER = "anonymoususer";
     public static final String PLATEMAP_DRAFT_STATUS = "DRAFT";
-    public static final String PLATEMAP_BUCKET_SYSTEM_KEY = "platemap_export_bucket";
-    public static final String DEFAULT_BUCKETNAME = "mitlabs";
 
     private Constants() {
     }

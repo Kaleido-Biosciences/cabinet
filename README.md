@@ -158,11 +158,11 @@ will generate few files:
 
 ### Amazon S3 settings
 
-You need to add below three variables in environmental variables to enable Amazon S3 capabilities
+You need to provide Amazon S3 details of below variables in environment to enable platemap object writing to S3
 
 1. AWS_ACCESS_KEY_ID
 2. AWS_SECRET_ACCESS_KEY
-3. platemap_export_bucket (Bucket name)
+3. platemap_export_bucket
 
 ## Building for production
 
