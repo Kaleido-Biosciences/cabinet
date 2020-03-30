@@ -2,10 +2,16 @@ package com.kaleido.service;
 
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kaleido.config.Constants;
 import com.kaleido.domain.PlateMap;
 import com.kaleido.domain.enumeration.Status;
 import com.kaleido.repository.PlateMapRepository;
 import com.kaleido.repository.search.PlateMapSearchRepository;
+import com.kaleido.service.amazonaws.s3.CabinetS3Client;
+import com.kaleido.service.amazonaws.s3.CabinetS3Exception;
 import com.kaleido.service.dto.PlateMapDTO;
 import com.kaleido.util.DataUtillity;
 
@@ -34,6 +40,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -53,9 +60,13 @@ public class PlateMapService {
     @Autowired
     private final PlateMapSearchRepository plateMapSearchRepository;
     
-    public PlateMapService(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository) {
+    @Autowired
+    private final CabinetS3Client cabinetS3Client;
+    
+    public PlateMapService(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository, CabinetS3Client cabinetS3Client) {
     	this.plateMapRepository = plateMapRepository;
     	this.plateMapSearchRepository = plateMapSearchRepository;
+    	this.cabinetS3Client = cabinetS3Client;
     }
     
     public ResponseEntity<String> updatePlateMap(PlateMap plateMap) {
@@ -131,6 +142,22 @@ public class PlateMapService {
         plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
         PlateMap result = plateMapRepository.save(plateMap);
         plateMapSearchRepository.save(result);
+        if(!plateMap.getStatus().equals(Constants.PLATEMAP_DRAFT_STATUS)) {
+            exportPlate(plateMap);
+        }
         return checksum;
+    }
+    
+    private void exportPlate(PlateMap platemap) {
+        CompletableFuture.runAsync(() -> {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                cabinetS3Client.writeToS3(platemap.getActivityName(), mapper.writeValueAsString(platemap));
+            } catch (CabinetS3Exception e) {
+                log.error("Error occured in putting platemap to s3 "+e.getMessage());
+            } catch (JsonProcessingException e) {
+                log.error("Error occured in converting platemap object to json"+e.getMessage());
+            }
+        });
     }
 }

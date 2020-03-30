@@ -147,6 +147,10 @@ jhipster:
   audit-events:
     retention-period: 30 # Number of days before audit events are deleted.
 
+#S3 Bucketname for platemaps
+s3:
+  platemap:
+    bucketname: ${platemap_export_bucket}
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class
