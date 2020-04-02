@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="aruka (generated)" id="1585851424023-1">
+        <setColumnRemarks columnName="activity_name" tableName="plate_map"/>
+    </changeSet>
+    <changeSet author="aruka (generated)" id="1585851424023-2">
+        <setColumnRemarks columnName="checksum" tableName="plate_map"/>
+    </changeSet>
+    <changeSet author="aruka (generated)" id="1585851424023-3">
+        <setColumnRemarks columnName="data" tableName="plate_map"/>
+    </changeSet>
+    <changeSet author="aruka (generated)" id="1585851424023-4">
+        <setColumnRemarks columnName="num_plates" tableName="plate_map"/>
+    </changeSet>
+</databaseChangeLog>
