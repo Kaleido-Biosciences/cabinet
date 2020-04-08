@@ -2,29 +2,30 @@ package com.kaleido.service.amazonaws.s3;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-
-import liquibase.util.StringUtils;
+import com.amazonaws.services.s3.AmazonS3;
 
 @Configuration
 public class S3Configuration {
     private final Logger log = LoggerFactory.getLogger(S3Configuration.class);
-    
+
     @Value("${s3.platemap.bucketname:kaleido_platemaps}")
     private String bucketName;
-    
+
+    @Autowired
+    AmazonS3 s3;
+
     /**
      * Makes a CabinetS3Client available to the Spring Boot framework
      * @return
      */
     @Bean
     public CabinetS3Client getCabinetS3Client(){
-    	log.debug("Platemap export buckent name :"+bucketName);
-        return new CabinetS3Client( AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build(), bucketName);
+        log.debug("Platemap export buckent name :"+bucketName);
+        return new CabinetS3Client( s3, bucketName);
     }
 }

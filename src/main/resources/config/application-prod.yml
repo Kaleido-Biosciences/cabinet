@@ -151,6 +151,15 @@ jhipster:
 s3:
   platemap:
     bucketname: ${platemap_export_bucket}
+
+cloud:
+  aws:
+    region:
+      static: us-east-1
+    stack:
+      auto: false
+    credentials:
+      useDefaultAwsCredentialsChain: true
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class
