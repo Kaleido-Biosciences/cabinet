@@ -13,7 +13,7 @@ import com.amazonaws.services.s3.AmazonS3;
 public class S3Configuration {
     private final Logger log = LoggerFactory.getLogger(S3Configuration.class);
 
-    @Value("${platemap.export.bucket}")
+    @Value("${platemap.bucket}")
     private String bucketName;
 
     @Autowired
