@@ -36,8 +36,24 @@ maven-compile:
       - target/generated-sources/
     expire_in: 1 day
 
-maven-test:
+maven-test-live:
   stage: test
+  environment:
+    name: live
+  script:
+    - ./mvnw -ntp verify -Dmaven.repo.local=$MAVEN_USER_HOME
+  artifacts:
+    reports:
+      junit: target/test-results/**/TEST-*.xml
+    paths:
+      - target/test-results
+      - target/jacoco
+    expire_in: 1 day
+
+maven-test-staging:
+  stage: test
+  environment:
+    name: staging
   script:
     - ./mvnw -ntp verify -Dmaven.repo.local=$MAVEN_USER_HOME
   artifacts:
@@ -135,8 +151,8 @@ teardown_staging:
     - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" deployment.yaml service.yaml
     - sed -i "s/__CI_PROJECT_NAMESPACE__/${CI_PROJECT_NAMESPACE}/" deployment.yaml
     - sed -i "s/__URL__/${CI_PROJECT_NAME}-staging/" ingress.yaml deployment.yaml
-#    - cat deployment.yaml
-#    - cat service.yaml
+    #    - cat deployment.yaml
+    #    - cat service.yaml
 
     # Cleanup old services to make sure new docker containers are pulled
     - kubectl delete -f deployment.yaml
@@ -171,9 +187,9 @@ deploy_staging:
     - sed -i "s/__DB_URL__/${db_url}/" deployment.yaml
     - sed -i "s/__ELASTICSEARCH_URL__/${elasticsearch_url}/" deployment.yaml
     - sed -i "s/__EMAIL_PASSWORD__/${email_password}/" deployment.yaml
-#    - cat deployment.yaml
-#    - cat ingress.yaml
-#    - cat service.yaml
+    #    - cat deployment.yaml
+    #    - cat ingress.yaml
+    #    - cat service.yaml
 
     # Prepare for liftoff
     - kubectl apply -f deployment.yaml
@@ -204,8 +220,8 @@ teardown_live:
     - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" deployment.yaml service.yaml
     - sed -i "s/__CI_PROJECT_NAMESPACE__/${CI_PROJECT_NAMESPACE}/" deployment.yaml
     - sed -i "s/__URL__/${CI_PROJECT_NAME}/" ingress.yaml deployment.yaml
-#    - cat deployment.yaml
-#    - cat service.yaml
+    #    - cat deployment.yaml
+    #    - cat service.yaml
 
     # Cleanup old services to make sure new docker containers are pulled
     - kubectl delete -f deployment.yaml
@@ -240,9 +256,9 @@ deploy_live:
     - sed -i "s/__DB_URL__/${db_url}/" deployment.yaml
     - sed -i "s/__ELASTICSEARCH_URL__/${elasticsearch_url}/" deployment.yaml
     - sed -i "s/__EMAIL_PASSWORD__/${email_password}/" deployment.yaml
-#    - cat deployment.yaml
-#    - cat ingress.yaml
-#    - cat service.yaml
+    #    - cat deployment.yaml
+    #    - cat ingress.yaml
+    #    - cat service.yaml
 
     # Prepare for liftoff
     - kubectl apply -f deployment.yaml
