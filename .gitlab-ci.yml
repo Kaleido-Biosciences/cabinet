@@ -187,6 +187,7 @@ deploy_staging:
     - sed -i "s/__DB_URL__/${db_url}/" deployment.yaml
     - sed -i "s/__ELASTICSEARCH_URL__/${elasticsearch_url}/" deployment.yaml
     - sed -i "s/__EMAIL_PASSWORD__/${email_password}/" deployment.yaml
+    - sed -i "s/__PLATEMAP_EXPORT_BUCKET__/${platemap_export_bucket}/" deployment.yaml
     #    - cat deployment.yaml
     #    - cat ingress.yaml
     #    - cat service.yaml
@@ -256,6 +257,7 @@ deploy_live:
     - sed -i "s/__DB_URL__/${db_url}/" deployment.yaml
     - sed -i "s/__ELASTICSEARCH_URL__/${elasticsearch_url}/" deployment.yaml
     - sed -i "s/__EMAIL_PASSWORD__/${email_password}/" deployment.yaml
+    - sed -i "s/__PLATEMAP_EXPORT_BUCKET__/${platemap_export_bucket}/" deployment.yaml
     #    - cat deployment.yaml
     #    - cat ingress.yaml
     #    - cat service.yaml
