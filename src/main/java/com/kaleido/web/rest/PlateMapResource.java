@@ -1,15 +1,25 @@
 package com.kaleido.web.rest;
 
 import com.kaleido.domain.PlateMap;
+import com.kaleido.domain.enumeration.Status;
 import com.kaleido.repository.PlateMapRepository;
 import com.kaleido.repository.search.PlateMapSearchRepository;
+import com.kaleido.service.PlateMapService;
+import com.kaleido.service.dto.PlateMapDTO;
 import com.kaleido.web.rest.errors.BadRequestAlertException;
 
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional; 
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +27,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,8 +56,12 @@ public class PlateMapResource {
     private final PlateMapRepository plateMapRepository;
 
     private final PlateMapSearchRepository plateMapSearchRepository;
+    
+    @Autowired
+    private final PlateMapService plateMapService;
 
-    public PlateMapResource(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository) {
+    public PlateMapResource(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository, PlateMapService plateMapService) {
+        this.plateMapService = plateMapService;
         this.plateMapRepository = plateMapRepository;
         this.plateMapSearchRepository = plateMapSearchRepository;
     }
@@ -57,16 +74,14 @@ public class PlateMapResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/plate-maps")
-    public ResponseEntity<PlateMap> createPlateMap(@Valid @RequestBody PlateMap plateMap) throws URISyntaxException {
+    public ResponseEntity<String> createPlateMap(@Valid @RequestBody PlateMap plateMap) throws URISyntaxException {
         log.debug("REST request to save PlateMap : {}", plateMap);
-        if (plateMap.getId() != null) {
+        if(plateMap.getId() != null) {
             throw new BadRequestAlertException("A new plateMap cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        PlateMap result = plateMapRepository.save(plateMap);
-        plateMapSearchRepository.save(result);
-        return ResponseEntity.created(new URI("/api/plate-maps/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        String checksum = plateMapService.savePlateMap(plateMap);
+        return new ResponseEntity<String>(checksum,responseHeaders,HttpStatus.CREATED);
     }
 
     /**
@@ -79,16 +94,9 @@ public class PlateMapResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/plate-maps")
-    public ResponseEntity<PlateMap> updatePlateMap(@Valid @RequestBody PlateMap plateMap) throws URISyntaxException {
+    public ResponseEntity<String> updatePlateMap(@Valid @RequestBody PlateMap plateMap) throws URISyntaxException {
         log.debug("REST request to update PlateMap : {}", plateMap);
-        if (plateMap.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        PlateMap result = plateMapRepository.save(plateMap);
-        plateMapSearchRepository.save(result);
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, plateMap.getId().toString()))
-            .body(result);
+        return plateMapService.updatePlateMap(plateMap);
     }
 
     /**
@@ -144,4 +152,62 @@ public class PlateMapResource {
             .stream(plateMapSearchRepository.search(queryStringQuery(query)).spliterator(), false)
             .collect(Collectors.toList());
     }
+    
+    @PostMapping("/plate-maps/details")
+    public ResponseEntity<List<@Valid PlateMap>> getPlateMapByActivityName(@Valid @RequestBody PlateMap plateMap) {
+        log.debug("REST request to get PlateMap : {}", plateMap);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
+        return ResponseEntity.ok(results);
+    }
+    
+    @GetMapping("/plate-maps/data/{checksum}")
+    public ResponseEntity<@Valid PlateMap> getCompletedPlateMapDataByChecksum(@PathVariable String checksum) {
+        log.debug("REST request to get PlateMap draft data: {}", checksum);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        PlateMap plateMap = new PlateMap();
+        plateMap.setChecksum(checksum);
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        Optional<@Valid PlateMap> results = plateMapRepository.findOne(plateMapQuery);
+        return ResponseUtil.wrapOrNotFound(results);
+    }
+    
+    @GetMapping("/plate-maps/data/draft/{activityName}")
+    public ResponseEntity<@Valid PlateMap> getDraftPlateMapDataByActivityName(@PathVariable String activityName) {
+        log.debug("REST request to get PlateMap draft data: {}", activityName);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        PlateMap plateMap = new PlateMap();
+        plateMap.setActivityName(activityName);
+        plateMap.setStatus(Status.DRAFT);
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        Optional<@Valid PlateMap> results = plateMapRepository.findOne(plateMapQuery);
+        return ResponseUtil.wrapOrNotFound(results);
+    }
+    
+    @GetMapping("/plate-maps/data/completed/{activityName}")
+    public ResponseEntity<List<@Valid PlateMap>> getCompletedPlateMapDataListByActivityName(@PathVariable String activityName) {
+        log.debug("REST request to get PlateMap draft data: {}", activityName);
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        PlateMap plateMap = new PlateMap();
+        plateMap.setActivityName(activityName);
+        plateMap.setStatus(Status.COMPLETED);
+        Example<@Valid PlateMap> plateMapQuery = Example.of(plateMap, matcher);
+        List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
+        return ResponseEntity.ok(results);
+    }
+    
+    /**
+     * {@code GET  /plate-map-summary/{activityName} : get the plateMap summary based on activityName
+     *
+     * @param activityName the activityName to be searched.
+     * @return the list of PlateMapDTO Objects.
+     */
+    @GetMapping("/plate-map-summary/{activityName}")
+    public ResponseEntity<List<@Valid PlateMapDTO>> retrievePlateMapSummary(@PathVariable String activityName) {
+        log.debug("REST request to search PlateMaps based on activityName: ", activityName);
+        List<PlateMapDTO> plateMap = plateMapRepository.findAllByActivityName(activityName);
+        return ResponseEntity.ok(plateMap);
+    }
+    
 }

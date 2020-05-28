@@ -39,6 +39,8 @@ spec:
           value: __URL__
         - name: elasticsearch_url
           value: __ELASTICSEARCH_URL__
+        - name: platemap_export_bucket
+          value: __PLATEMAP_EXPORT_BUCKET__
         - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
           value: __JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET__
         - name: MANAGEMENT_METRICS_EXPORT_DATADOG_ENABLED

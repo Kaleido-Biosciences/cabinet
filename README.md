@@ -2,6 +2,57 @@
 
 Cabinet is a Database schema and API for storing and accessing information about activities.
 
+## Endpoints
+
+The following endpoints are exposed when the application is running:
+
+POST `/api/plate-maps` - Saves a new platemap draft
+
+```json
+{
+  "activityName": "G001",
+  "data": "zip data"
+}
+```
+
+PUT `/api/plate-maps` - Updates existing platemap
+
+```json
+{
+    "id": 1,
+    "activityName": "G001",
+    "checksum": "12314124",
+    "data": "zip data"
+    "status": "DRAFT | COMPLETED"
+}
+```
+
+GET `/api/plate-maps` - Retrieves all platemaps
+
+GET `/api/plate-maps/{id}` - Retrieves the specified id platemap
+
+DELETE `/api/plate-maps/{id}` - Delete the specified id platemap
+
+POST `/api/plate-maps/details` - Retrieves platemap data based on the json body combination, non-desired values can be removed from the body, accepted values are as listed
+
+```json
+{
+  "id": 1,
+  "activityName": "G001",
+  "checksum": "1234556",
+  "data": "zip data",
+  "numPlates": 1
+}
+```
+
+GET `/api/plate-maps/data/{checksum}` - Retrieves the specified checksum platemap
+
+GET `/api/plate-maps/data/draft/{activityName}` - Retrieves the draft of the specified activityName
+
+GET `/api/plate-maps/data/completed/{activityName}` - Retrieves the list of completed platemaps of the specified activityName
+
+GET `/api/plate-map-summary/{activityName}` - Retrieves platemap summary of the specified activityName
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
@@ -104,6 +155,14 @@ will generate few files:
     create src/main/webapp/app/my-component/my-component.component.html
     create src/main/webapp/app/my-component/my-component.component.ts
     update src/main/webapp/app/app.module.ts
+
+### Amazon S3 settings
+
+You need to provide Amazon S3 details of below variables in environment to enable platemap object writing to S3
+
+1. AWS_ACCESS_KEY_ID
+2. AWS_SECRET_ACCESS_KEY
+3. platemap_export_bucket
 
 ## Building for production
 
