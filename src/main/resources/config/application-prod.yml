@@ -39,6 +39,7 @@ spring:
     hikari:
       poolName: Hikari
       auto-commit: false
+      minimum-idle: 2
   jpa:
     database-platform: io.github.jhipster.domain.util.FixedPostgreSQL95Dialect
     database: POSTGRESQL
