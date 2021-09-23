@@ -48,6 +48,7 @@ spring:
     hikari:
       poolName: Hikari
       auto-commit: false
+      minimum-idle: 2
   h2:
     console:
       enabled: false
