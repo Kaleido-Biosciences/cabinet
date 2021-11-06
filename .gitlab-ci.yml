@@ -38,6 +38,8 @@ maven-compile:
 
 maven-test-live:
   stage: test
+  only:
+    - master
   environment:
     name: live
   script:
@@ -52,6 +54,8 @@ maven-test-live:
 
 maven-test-staging:
   stage: test
+  only:
+    - develop
   environment:
     name: staging
   script:
