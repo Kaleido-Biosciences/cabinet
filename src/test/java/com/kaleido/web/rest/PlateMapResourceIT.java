@@ -58,7 +58,7 @@ public class PlateMapResourceIT {
 
     private static final String DEFAULT_DATA = "AAAAAAAAAA";
     private static final String UPDATED_DATA = "BBBBBBBBBB";
-    
+
     private static final Integer DEFAULT_NUM_PLATES = 1234;
     private static final Integer UPDATED_NUM_PLATES = 1234;
 
@@ -91,7 +91,7 @@ public class PlateMapResourceIT {
     private MockMvc restPlateMapMockMvc;
 
     private PlateMap plateMap;
-    
+
     @Autowired
     private PlateMapService plateMapService;
 
@@ -168,28 +168,7 @@ public class PlateMapResourceIT {
         // Validate the PlateMap in Elasticsearch
         verify(mockPlateMapSearchRepository, times(1)).save(testPlateMap);
     }
-
-    @Test
-    @Transactional
-    public void createPlateMapWithExistingId() throws Exception {
-        int databaseSizeBeforeCreate = plateMapRepository.findAll().size();
-
-        // Create the PlateMap with an existing ID
-        plateMap.setId(1L);
-
-        // An entity with an existing ID cannot be created, so this API call must fail
-        restPlateMapMockMvc.perform(post("/api/plate-maps")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(plateMap)))
-            .andExpect(status().isBadRequest());
-
-        // Validate the PlateMap in the database
-        List<PlateMap> plateMapList = plateMapRepository.findAll();
-        assertThat(plateMapList).hasSize(databaseSizeBeforeCreate);
-
-        // Validate the PlateMap in Elasticsearch
-        verify(mockPlateMapSearchRepository, times(0)).save(plateMap);
-    }
+//k
 
 
     @Test
@@ -209,7 +188,7 @@ public class PlateMapResourceIT {
             .andExpect(jsonPath("$.[*].activityName").value(hasItem(DEFAULT_ACTIVITY_NAME)))
             .andExpect(jsonPath("$.[*].data").value(hasItem(DEFAULT_DATA)));
     }
-    
+
     @Test
     @Transactional
     public void getPlateMap() throws Exception {
@@ -287,7 +266,7 @@ public class PlateMapResourceIT {
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(plateMap)))
             .andExpect(status().is4xxClientError());
-        
+
         // Validate the PlateMap in the database
         List<PlateMap> plateMapList = plateMapRepository.findAll();
         assertThat(plateMapList).hasSize(databaseSizeBeforeUpdate);
