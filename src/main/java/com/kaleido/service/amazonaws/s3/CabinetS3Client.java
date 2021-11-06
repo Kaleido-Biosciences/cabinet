@@ -21,7 +21,7 @@ public class CabinetS3Client {
 
     /**
      * Puts the object in jsonString format to Amazon s3
-     * @param key
+     * @param fileName
      * @param content
      * @return
      * @throws CabinetS3Exception

@@ -3,6 +3,7 @@ package com.kaleido.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.ByteArrayInputStream;
@@ -13,15 +14,19 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class DataUtillity {
-    
-    public static int getPlatesCount(String encodedZipString){
+
+    public static int getPlatesCount(String plateData) throws IOException {
+        return getPlatesCount(plateData, false);
+    }
+    public static int getPlatesCount(String plateData, Boolean encoded) throws IOException {
+        if (encoded) {
+            plateData = decodeAndUnZipString(plateData);
+        }
         int count = 0;
         try{
-            //taking raw json as zip code is not ready 
-            String decodedZipString = encodedZipString;
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(decodedZipString);
-            ArrayNode arrayData = (ArrayNode) jsonNode; 
+            JsonNode jsonNode = mapper.readTree(plateData);
+            ArrayNode arrayData = (ArrayNode) jsonNode;
             count = arrayData.size();
         }catch(Exception e) {
             //Need to add logger
@@ -29,7 +34,23 @@ public class DataUtillity {
         }
         return count;
     }
-    
+
+    public static int getEncodedPlatesCount(String encodedZipString){
+        int count = 0;
+        try{
+            //taking raw json as zip code is not ready
+            String decodedZipString = encodedZipString;
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(decodedZipString);
+            ArrayNode arrayData = (ArrayNode) jsonNode;
+            count = arrayData.size();
+        }catch(Exception e) {
+            //Need to add logger
+            e.printStackTrace();
+        }
+        return count;
+    }
+
     public static String encodeAndZipString(String srcTxt)
         throws IOException {
         ByteArrayOutputStream rstBao = new ByteArrayOutputStream();

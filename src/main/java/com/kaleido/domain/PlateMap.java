@@ -1,4 +1,5 @@
 package com.kaleido.domain;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -7,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.*;
 
 import org.springframework.data.elasticsearch.annotations.FieldType;
+
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,6 +25,17 @@ import com.kaleido.domain.enumeration.Status;
 public class PlateMap implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public PlateMap() {
+    }
+
+    public PlateMap(PlateMap plateMap) {
+        this.activityName(plateMap.activityName);
+        this.numPlates(plateMap.numPlates);
+        this.status(plateMap.status);
+        this.lastModified(plateMap.lastModified);
+        this.data(plateMap.data);
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
@@ -42,6 +55,7 @@ public class PlateMap implements Serializable {
      */
     @ApiModelProperty(value = "The checksum is used when saving a new draft, as the last checksum has to be passed\nand match the most recent timestamp. Otherwise it is considered attempting to save a stale draft")
     @Column(name = "checksum")
+    @Deprecated
     private String checksum;
 
     /**
@@ -58,14 +72,14 @@ public class PlateMap implements Serializable {
     @ApiModelProperty(value = "The data field is a gzip -> base64 encoded string of the plate map data")
     @Column(name = "data", length = 10485760)
     private String data;
-    
+
     /**
      * The number of plates that are in the platemap
      */
     @ApiModelProperty(value = "The number of plates that are in the platemap")
     @Column(name = "num_plates")
     private Integer numPlates;
-    
+
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
         return id;
@@ -144,16 +158,16 @@ public class PlateMap implements Serializable {
     public Integer getNumPlates() {
         return numPlates;
     }
-    
+
     public PlateMap numPlates(Integer numPlates) {
         this.numPlates = numPlates;
         return this;
     }
-    
+
     public void setNumPlates(Integer numPlates) {
         this.numPlates = numPlates;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -182,9 +196,9 @@ public class PlateMap implements Serializable {
             ", data='" + getData() + "'" +
             "}";
     }
-    
+
     public String prepareStringForChecksum() {
-    	DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-    	return getStatus().toString()+getLastModified().format(formatter)+getActivityName()+getData();
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+        return getStatus().toString() + getLastModified().format(formatter) + getActivityName() + getData();
     }
 }

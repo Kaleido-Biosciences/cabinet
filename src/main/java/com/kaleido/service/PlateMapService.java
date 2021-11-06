@@ -28,10 +28,12 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional; 
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
@@ -46,118 +48,80 @@ import java.util.stream.StreamSupport;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
-@Slf4j
 @Service
 public class PlateMapService {
-	
+
     private final Logger log = LoggerFactory.getLogger(PlateMapService.class);
 
     private static final String ENTITY_NAME = "plateMap";
-    
+
     @Autowired
     private final PlateMapRepository plateMapRepository;
 
     @Autowired
     private final PlateMapSearchRepository plateMapSearchRepository;
-    
+
     @Autowired
     private final CabinetS3Client cabinetS3Client;
-    
+
     public PlateMapService(PlateMapRepository plateMapRepository, PlateMapSearchRepository plateMapSearchRepository, CabinetS3Client cabinetS3Client) {
     	this.plateMapRepository = plateMapRepository;
     	this.plateMapSearchRepository = plateMapSearchRepository;
     	this.cabinetS3Client = cabinetS3Client;
     }
-    
-    public ResponseEntity<String> updatePlateMap(PlateMap plateMap) {
-    	log.debug("Platemap data is ", plateMap);
-    	
-        HttpHeaders responseHeaders = new HttpHeaders();
-        if (plateMap.getId() == null) {
-            return new ResponseEntity<String>("Invalid ID",responseHeaders,HttpStatus.BAD_REQUEST);
-            //throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        else {
-            //Retrieve data from database based on id, activity name, and checksum to check for latest value
-            PlateMap check = new PlateMap();
-            check.setId(plateMap.getId());
-            check.setActivityName(plateMap.getActivityName());
-            check.setChecksum(plateMap.getChecksum());
-            
-            ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
-            Example<@Valid PlateMap> plateMapQuery = Example.of(check, matcher);
-            List<@Valid PlateMap> results = plateMapRepository.findAll(plateMapQuery);
-            if(!results.isEmpty()) {
-                ZonedDateTime currentTime = ZonedDateTime.now();
-            	
-                if(plateMap.getStatus() == Status.COMPLETED) {
-                    //Updates the draft data to latest checksum and data, but leave DRAFT status
-                    plateMap.setStatus(Status.DRAFT);
-                    plateMap.setLastModified(currentTime);
-                    String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
-                    plateMap.setChecksum(draftChecksum);
-                    plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
-                
-                    // Create new platemap with the same data but COMPLETED status
-                    PlateMap completedPlateMap = new PlateMap();
-                    completedPlateMap.setActivityName(plateMap.getActivityName());
-                    completedPlateMap.setData(plateMap.getData());
-                    completedPlateMap.setLastModified(currentTime);
-                    completedPlateMap.setStatus(Status.COMPLETED);
-                    completedPlateMap.setNumPlates(plateMap.getNumPlates());
-                    String completedChecksum = DigestUtils.md5Hex(completedPlateMap.prepareStringForChecksum());
-                    completedPlateMap.setChecksum(completedChecksum);
 
-                    List<PlateMap> plateMapList = Arrays.asList(plateMap,completedPlateMap);
-                    List<PlateMap> result = plateMapRepository.saveAll(plateMapList);
-                    plateMapSearchRepository.saveAll(result);
-
-                    return new ResponseEntity<String>(draftChecksum,responseHeaders,HttpStatus.OK);
-                }
-                else if(plateMap.getStatus() == Status.DRAFT) {
-                    plateMap.setLastModified(currentTime);
-                    String draftChecksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
-                    plateMap.setChecksum(draftChecksum);
-                    plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
-                    PlateMap result = plateMapRepository.save(plateMap);
-                    plateMapSearchRepository.save(result);
-                    
-                    return new ResponseEntity<String>(draftChecksum,responseHeaders,HttpStatus.OK);
-                }
-                else {
-                	return new ResponseEntity<String>("No status is sent",responseHeaders,HttpStatus.BAD_REQUEST);
-                }
-            }
-            else {
-                return new ResponseEntity<String>("Checksum is not the most recent",responseHeaders,HttpStatus.CONFLICT);
-            }
-        }
+    /**
+     * Get one plateMap by id.
+     *
+     * @param activityName the activity name of the entity
+     * @return the entity
+     */
+    @Transactional(readOnly = true)
+    public Optional<PlateMap> findDraftByActivityName(String activityName) {
+        log.debug("Request to get Batch : {}", activityName);
+        return plateMapRepository.findFirstByActivityNameEqualsAndStatusEquals(activityName, Status.DRAFT);
     }
-    
-    public String savePlateMap(PlateMap plateMap) {
+
+    /**
+     * Save an instance of a platemap
+     * @param plateMap
+     * @return
+     */
+    public PlateMap savePlateMap(PlateMap plateMap) throws IOException {
+        boolean release = false;
+        if (plateMap.getStatus().equals(Status.COMPLETED)){
+            release = true;
+        }
+        final PlateMap currentPlateMap = findDraftByActivityName(plateMap.getActivityName()).orElse(null);
+        if (currentPlateMap != null){
+            plateMap.setId(currentPlateMap.getId());
+        }
         ZonedDateTime currentTime = ZonedDateTime.now();
         plateMap.setLastModified(currentTime);
-        String checksum = DigestUtils.md5Hex(plateMap.prepareStringForChecksum());
-        plateMap.setChecksum(checksum);
-        plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
-        PlateMap result = plateMapRepository.save(plateMap);
+        //plateMap.setNumPlates(DataUtillity.getPlatesCount(plateMap.getData()));
+        PlateMap result = plateMapRepository.save(plateMap.status(Status.DRAFT));
         plateMapSearchRepository.save(result);
-        if(!plateMap.getStatus().equals(Constants.PLATEMAP_DRAFT_STATUS)) {
-            exportPlate(plateMap);
+        if(release) {
+            exportPlate(new PlateMap(result).status(Status.COMPLETED));
         }
-        return checksum;
+        return result;
     }
-    
-    private void exportPlate(PlateMap platemap) {
+
+    private void exportPlate(PlateMap plateToRelease) {
+        //Save as a new entry
         CompletableFuture.runAsync(() -> {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                cabinetS3Client.writeToS3(platemap.getActivityName(), mapper.writeValueAsString(platemap));
+                cabinetS3Client.writeToS3(plateToRelease.getActivityName()+".json", mapper.writeValueAsString(plateToRelease));
             } catch (CabinetS3Exception e) {
-                log.error("Error occured in putting platemap to s3 "+e.getMessage());
+                log.error("Error occurred in putting platemap to s3 "+e.getMessage());
+                plateToRelease.setStatus(Status.ERROR);
             } catch (JsonProcessingException e) {
-                log.error("Error occured in converting platemap object to json"+e.getMessage());
+                log.error("Error occurred in converting platemap object to json"+e.getMessage());
+                plateToRelease.setStatus(Status.ERROR);
             }
         });
+        PlateMap result = plateMapRepository.save(plateToRelease);
+        plateMapSearchRepository.save(result);
     }
 }
